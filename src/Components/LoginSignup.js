@@ -1,59 +1,82 @@
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
 import React, { useState } from 'react'
 import { useContext } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import UserContext from '../Contexts/UserContext';
 import {MDBContainer, MDBCol, MDBRow, MDBBtn, MDBIcon, MDBInput, MDBCheckbox } from 'mdb-react-ui-kit';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase-config';
 
 export default function LoginSignup() {
 
-  // const [loginUser,setLoginUser] = useState([])
+  const [loginUser,setLoginUser] = useState([])
 
-  // const {user,setUser} = useContext(UserContext)
+  const {user,setUser} = useContext(UserContext)
 
-  //   const navigate=useNavigate()
+    const navigate=useNavigate()
 
-  //   const handleInput = (e) => {
-  //       const name=e.target.placeholder;
-  //       const value=e.target.value;
+    const auth = getAuth();
 
-  //       setLoginUser({...loginUser, [name]:value})
-  //       //console.log(newProduct)
-  //   }
+    const nav=useNavigate()
+
+
+    onAuthStateChanged(auth, (userr) => {
+      if (userr) {
+        nav('/home')
+      }
+    });
+
+    const handleInput = (e) => {
+        const name=e.target.name;
+        const value=e.target.value;
+        //console.log(loginUser)
+        setLoginUser({...loginUser, [name]:value})
+        //console.log(newProduct)
+    }
 
   
 
-  // const handleSignup = (e) => {
-  //   e.preventDefault()
-  //     navigate('/newUser')
-  // }
+  const handleSignup = (e) => {
+    e.preventDefault()
+      navigate('/newUser')
+  }
 
-  // const handleLogin = (e) => {
-  //   e.preventDefault()
+  const handleLogin = (e) => {
+    e.preventDefault()
 
-  //    const auth = getAuth();
-  //   signInWithEmailAndPassword(auth, loginUser.email, loginUser.password)
-  //     .then((userCredential) => {
-  //   // Signed in 
-  //   const userr = userCredential.user;
-  //   //console.log(user)
-  //    if(userr.emailVerified) {
-  //        setUser(userr.uid)
-  //        navigate('/userProfile')
-  //    }
-  //    else {
-  //      alert("Verify email")
-  //    }
-  // })
-  // .catch((error) => {
-  //   const errorCode = error.code;
-  //   const errorMessage = error.message;
-  //   alert(errorMessage)
-  // });
+    signInWithEmailAndPassword(auth, loginUser.email, loginUser.password)
+      .then((userCredential) => {
+    // Signed in 
+    const userr = userCredential.user;
+    //console.log(user)
+     if(userr.emailVerified) {
+         
+      const setUserName = async() => {
+        setUser({uid:userr.uid})
+       // console.log(user)
+
+        const userRef = doc(db, "Users", userr.uid);
+        const data = await getDoc(userRef);
+        setUser({...user,...data.data()})
+       // console.log(user)
+        navigate('/userProfile')
+       }
+
+       setUserName()
+     }
+     else {
+       alert("Verify email")
+     }
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    alert(errorMessage)
+  });
       
-  // }
+  }
 
 
   return (
@@ -117,8 +140,8 @@ export default function LoginSignup() {
             <p className="text-center fw-bold mx-3 mb-0">Or</p>
           </div>
 
-          <MDBInput wrapperClass='mb-4' label='Email address' id='formControlLg' type='email' size="lg"/>
-          <MDBInput wrapperClass='mb-4' label='Password' id='formControlLg' type='password' size="lg"/>
+          <MDBInput wrapperClass='mb-4' label='Email address' name="email" id='formControlLg' type='email' size="lg" onChange={handleInput} value={loginUser.email}/>
+          <MDBInput wrapperClass='mb-4' label='Password' name="password" id='formControlLg' type='password' size="lg" onChange={handleInput} value={loginUser.password}/>
 
           <div className="d-flex justify-content-between mb-4">
             <MDBCheckbox name='flexCheck' value='' id='flexCheckDefault' label='Remember me' />
@@ -126,8 +149,8 @@ export default function LoginSignup() {
           </div>
 
           <div className='text-center text-md-start mt-4 pt-2'>
-            <MDBBtn className="mb-0 px-5" size='lg'>Login</MDBBtn>
-            <p className="small fw-bold mt-2 pt-1 mb-2">Don't have an account? <a href="NewUser.js" className="link-danger">Register</a></p>
+            <MDBBtn className="mb-0 px-5" size='lg' onClick={handleLogin}>Login</MDBBtn>
+            <p className="small fw-bold mt-2 pt-1 mb-2">Don't have an account? <Link to="/newUser" className="link-danger">Register</Link></p>
           </div>
 
         </MDBCol>

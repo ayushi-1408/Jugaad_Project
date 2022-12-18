@@ -25,16 +25,28 @@ import AddEvent from "./Components/AddEvent";
 import PlaceOrder from "./Components/PlaceOrder";
 import { useState } from "react";
 import AddBlog from "./Components/AddBlog";
-import Appa from "./Components/footer";
+import FooterPart from "./Components/footer";
+import ProductContext from "./Contexts/ProductsContext";
+import BlogsContext from "./Contexts/BlogsContext";
+import EventsContext from "./Contexts/EventsContext";
+
 function App() {
   const [user, setUser] = useState();
+  const [products, setProducts] = useState();
+  const [blogs, setBlogs] = useState();
+  const [events, setEvents] = useState();
+
+  // harshita.1470@gmail.com
   
   return (
     <div className="App">
       <UserContext.Provider value={{ user, setUser }}>
+      <ProductContext.Provider value={{ products, setProducts }}>
+      <BlogsContext.Provider value={{ blogs, setBlogs }}>
+      <EventsContext.Provider value={{events, setEvents }}>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Navigationbar />}>
+              <Route path="/" element={<Navigationbar />}>
               <Route index element={<HomePage />} />
               
               <Route path="login" element={<LoginSignup />} />
@@ -55,8 +67,12 @@ function App() {
             </Route>
             
           </Routes>
+          <FooterPart/>
         </BrowserRouter>
         
+      </EventsContext.Provider>
+      </BlogsContext.Provider>
+      </ProductContext.Provider>
       </UserContext.Provider>
     </div>
   );

@@ -16,6 +16,7 @@ import {
   Input,
   Row,
 } from "reactstrap";
+import BlogsContext from '../Contexts/BlogsContext';
 
 
 function AddBlog() {
@@ -23,17 +24,22 @@ function AddBlog() {
     const BlogCollectionRef = collection(db , "Blogs" )
 
     const {user,setUser}= useContext(UserContext)
+    const {blogs, setBlogs} = useContext(BlogsContext)
     const auth=getAuth()
 
     const nav=useNavigate()
 
-    if(!user) {
+    if (user==undefined || user.uid == undefined) {
       onAuthStateChanged(auth, (userr) => {
         if (userr) {
-          console.log(userr)
-          setUser(userr.uid)
+         // console.log(userr);
+          const getUser = async () => {
+            const userRef = doc(db, "Users", userr.uid);
+            const data = await getDoc(userRef);
+            setUser({...data.data(),uid:userr.uid})
+          };
+          getUser();
         } else {
-          console.log("not signed")
           nav('/login')
         }
       });
@@ -58,6 +64,9 @@ function AddBlog() {
             BID:arrayUnion(ref1.id)
             })
             console.log("updated user")
+            setBlogs();
+            setUser();
+            nav('/userProfile');
          }
      
          addBlog();

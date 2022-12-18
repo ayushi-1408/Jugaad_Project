@@ -7,6 +7,7 @@ import {addDoc, arrayUnion, collection , doc, getDoc, getDocs, setDoc, updateDoc
 import UserContext from '../Contexts/UserContext';
 import { Link, redirect, useNavigate } from 'react-router-dom';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import ProductContext from '../Contexts/ProductsContext';
 
 
 function AddProduct() {
@@ -14,23 +15,29 @@ function AddProduct() {
     const productCollectionRef = collection(db , "Products" )
 
     const {user,setUser}= useContext(UserContext)
+    const {products, setProducts} = useContext(ProductContext)
     const auth=getAuth()
 
     const userData=[{}]
 
     const nav=useNavigate()
 
-    if(!user) {
+    if (user==undefined || user.uid == undefined) {
       onAuthStateChanged(auth, (userr) => {
         if (userr) {
-          console.log(userr)
-          setUser(userr.uid)
+         // console.log(userr);
+          const getUser = async () => {
+            const userRef = doc(db, "Users", userr.uid);
+            const data = await getDoc(userRef);
+            setUser({...data.data(),uid:userr.uid})
+          };
+          getUser();
         } else {
-          console.log("not signed")
           nav('/login')
         }
       });
     }
+  
 
     const handleInput = (e) => {
         const name=e.target.placeholder;
@@ -56,6 +63,9 @@ function AddProduct() {
             PID:arrayUnion(ref1.id)
             })
             console.log("updated user")
+            setProducts();
+            setUser();
+            nav('/userProfile');
          }
      
          addProduct();

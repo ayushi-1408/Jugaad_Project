@@ -15,12 +15,13 @@ import {
 } from "firebase/firestore";
 import UserContext from "../Contexts/UserContext";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import Spinner from "./Spinner";
 
 function ViewFullProduct(props) {
   const param = useParams();
   const { id } = param;
   console.log(id);
-  const [product, setProduct] = useState([]);
+  const [product, setProduct] = useState();
 
   const { user, setUser } = useContext(UserContext);
   const auth = getAuth();
@@ -29,19 +30,21 @@ function ViewFullProduct(props) {
 
   const nav=useNavigate()
 
-    if(!user) {
-      onAuthStateChanged(auth, (userr) => {
-        if (userr) {
-          console.log(userr)
-          setUser(userr.uid)
-        } else {
-          console.log("not signed")
-          nav('/login')
-        }
-      });
-    }
-
-  console.log(user);
+  if (user==undefined || user.uid == undefined) {
+    onAuthStateChanged(auth, (userr) => {
+      if (userr) {
+       // console.log(userr);
+        const getUser = async () => {
+          const userRef = doc(db, "Users", userr.uid);
+          const data = await getDoc(userRef);
+          setUser({...data.data(),uid:userr.uid})
+        };
+        getUser();
+      } else {
+        nav('/login')
+      }
+    });
+  }
 
   useEffect(() => {
     const getProduct = async () => {
@@ -68,29 +71,37 @@ function ViewFullProduct(props) {
   };
 
   return (
-    <div>
-      <Card>
-        <p style={{ alignContent: "center" }}>
-          <Card.Img
-            variant="top"
-            src={product.image}
-            style={{ maxWidth: "100px", maxHeight: "100px" }}
-          />
-        </p>
-        <Card.Body>
-          <Card.Text>{product.title}</Card.Text>
-        </Card.Body>
-      </Card>
-      <br />
-      <Card>
-        <Card.Body>
-          <Card.Text>{product.description}</Card.Text>
-        </Card.Body>
-        <Button variant="primary" type="submit" onClick={handleCart}>
-          Add to Cart
-        </Button>
-      </Card>
-    </div>
+    <>
+    {
+      product !== undefined ? (
+        <div>
+        <Card>
+          <p style={{ alignContent: "center" }}>
+            <Card.Img
+              variant="top"
+              src={product.image}
+              style={{ maxWidth: "100px", maxHeight: "100px" }}
+            />
+          </p>
+          <Card.Body>
+            <Card.Text>{product.title}</Card.Text>
+          </Card.Body>
+        </Card>
+        <br />
+        <Card>
+          <Card.Body>
+            <Card.Text>{product.description}</Card.Text>
+          </Card.Body>
+          <Button variant="primary" type="submit" onClick={handleCart}>
+            Add to Cart
+          </Button>
+        </Card>
+      </div>
+      ) : (
+        <Spinner/>
+      )
+    }
+    </>
   );
 }
 
