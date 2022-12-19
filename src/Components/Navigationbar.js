@@ -1,3 +1,4 @@
+import { getAuth, signOut } from "firebase/auth";
 import React, { useContext } from "react";
 import { Button } from "react-bootstrap";
 import Container from "react-bootstrap/Container";
@@ -16,15 +17,24 @@ function Navigationbar() {
 
   const handleLogout = (e) => {
     e.preventDefault();
-    Logout();
-    setUser();
+    const auth = getAuth();
+    signOut(auth)
+      .then(() => {
+          console.log("logged out")
+          setUser();
+          console.log(user);
+      })
+      .catch((error) => {
+        console.log(error)
+      });
     nav("/");
   };
+
   return (
     <div>
       <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark"  fixed="top" position="relative" >
         <Container>
-          <Navbar.Brand href="#home">JUGAAD</Navbar.Brand>
+          <Navbar.Brand href="/">JUGAAD</Navbar.Brand>
           <Navbar.Toggle aria-controls="responsive-navbar-nav" />
           <Navbar.Collapse id="responsive-navbar-nav">
             <Nav className="me-auto">

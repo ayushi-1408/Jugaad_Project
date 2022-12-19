@@ -1,5 +1,5 @@
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, getDocs } from "firebase/firestore";
+import { browserPopupRedirectResolver, getAuth, onAuthStateChanged } from "firebase/auth";
+import { arrayRemove, arrayUnion, doc, getDoc, getDocs, updateDoc } from "firebase/firestore";
 import React, { useEffect } from "react";
 import { useState } from "react";
 import { useContext } from "react";
@@ -26,10 +26,12 @@ import {
   MDBTypography,
   } from "mdb-react-ui-kit";
 import Spinner from "./Spinner";
+import OrderContext from "../Contexts/OrderContext";
  
 function Cart() {
   const { user, setUser } = useContext(UserContext);
   const [cart, setCart] = useState();
+  const [sum,setSum] = useState(0);
   const auth = getAuth();
 
   const nav=useNavigate()
@@ -46,36 +48,73 @@ function Cart() {
       });
     }
 
+    const handleInput = (e) => {
+      const userRef = doc(db, "Users", user.uid);
+      const name=e.target.name;
+      const value=e.target.value;
+      const val= -parseInt(cart[name].quantity)+parseInt(value);
+      setSum((sum) => sum+val*parseInt(cart[name].price));
+      const updateCart = async() => {
+        updateDoc(userRef, {
+           Cart: arrayRemove({product:cart[name].pid, quantity:cart[name].quantity})
+        });
+        updateDoc(userRef, {
+          Cart: arrayUnion({product:cart[name].pid, quantity:value})
+       });
+      }
+      updateCart();
+      setCart(cart.map((product) => 
+        product.pid===cart[name].pid? {...product,quantity:value} : {...product}
+      )
+      );
+  }
+
+  const handleRemove = (e) => {
+    console.log("removing")
+    const userRef = doc(db, "Users", user.uid);
+    const name=e.target.name;
+    const val= -parseInt(cart[name].quantity);
+    setSum((sum) => sum+val*parseInt(cart[name].price));
+    const updateCart = async() => {
+      updateDoc(userRef, {
+         Cart: arrayRemove({product:cart[name].pid, quantity:cart[name].quantity})
+      });
+    }
+    updateCart();
+    setCart((products) => (
+      products.filter((product) => product.pid !== cart[name].pid)
+    ));
+  }
+    
+
   useEffect(() => {
     const getCart = async () => {
       const userRef = doc(db, "Users", user.uid);
-      
-      //console.log(auth.currentUser)
       const data = await getDoc(userRef);
       setUser({...user, name:data.data().name})
-      console.log(data.data().Cart);
-      console.log(user)
       setCart([])
       data.data().Cart.forEach((element) => {
-        const productCollectionRef = doc(db, "Products", element);
+        const productCollectionRef = doc(db, "Products", element.product);
         const getProduct = async () => {
-          const data = await getDoc(productCollectionRef);
-          const temp = data.data();
-          temp.id = data.id;
-          // setPrice(price+temp.price)
-          setCart((arr) => [...arr, temp]);
+        const data = await getDoc(productCollectionRef);
+        const temp = data.data();
+        console.log(temp)
+        temp.quantity=element.quantity;
+        temp.pid = element.product;
+        setSum((sum) => temp.price*temp.quantity+sum);
+        setCart((arr) => [...arr, temp]);
         };
-        getProduct();
+        getProduct(); 
       });
     };
     getCart();
-    //console.log(auth.currentUser)
   }, [!user]);
 
   return (
     <>
    
    {
+    
       cart !== undefined ? (
         <section className="h-100 gradient-custom">
         <MDBContainer className="py-5 h-100">
@@ -110,10 +149,10 @@ function Cart() {
                         <p>Color: blue</p>
                         <p>Size: M</p>
       
-                        <MDBTooltip wrapperProps={{ size: "sm" }} wrapperClass="me-1 mb-2"
-                          title="Remove item">
+                        <MDBBtn wrapperProps={{ size: "sm" }} wrapperClass="me-1 mb-2"
+                          title="Remove item" type="button" onClick={handleRemove} name={cart.indexOf(product)}>
                           <MDBIcon fas icon="trash" />
-                        </MDBTooltip>
+                        </MDBBtn>
       
                         <MDBTooltip wrapperProps={{ size: "sm", color: "danger" }} wrapperClass="me-1 mb-2"
                           title="Move to the wish list">
@@ -122,19 +161,17 @@ function Cart() {
                       </MDBCol>
                       <MDBCol lg="4" md="6" className="mb-4 mb-lg-0">
                         <div className="d-flex mb-4" style={{ maxWidth: "300px" }}>
-                          <MDBBtn className="px-3 me-2">
-                            <MDBIcon fas icon="minus" />
-                          </MDBBtn>
+                          
       
-                          <MDBInput defaultValue={1} min={0} type="number" label="Quantity" />
+                          <MDBInput defaultValue={product.quantity} min={1} type="number" label="Quantity" name={cart.indexOf(product)} onChange={handleInput} />
       
-                          <MDBBtn className="px-3 ms-2">
-                            <MDBIcon fas icon="plus" />
-                          </MDBBtn>
+                          
+          
+                          
                         </div>
       
                         <p className="text-start text-md-center">
-                          <strong>{product.price}</strong>
+                          <strong>${product.price}</strong>
                         </p>
                       </MDBCol>
                     </MDBRow><hr className="my-4" /></>
@@ -186,7 +223,7 @@ function Cart() {
                     <MDBListGroupItem
                       className="d-flex justify-content-between align-items-center border-0 px-0 pb-0">
                       Products
-                      <span>$53.98</span>
+                      <span>${sum}</span>
                     </MDBListGroupItem>
                     <MDBListGroupItem className="d-flex justify-content-between align-items-center px-0">
                       Shipping
@@ -201,7 +238,7 @@ function Cart() {
                         </strong>
                       </div>
                       <span>
-                        <strong>$53.98</strong>
+                        <strong>${sum}</strong>
                       </span>
                     </MDBListGroupItem>
                   </MDBListGroup>

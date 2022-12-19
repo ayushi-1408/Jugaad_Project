@@ -18,7 +18,25 @@ import {
 from 'mdb-react-ui-kit';
 
 function NewUser() {
-    const [newUser,setNewUser] = useState([])
+    const [newUser,setNewUser] = useState({
+      name:"",
+      password:"",
+      description:"",
+      address:"",
+      connections: {
+        connected:[],
+        requestsReceived:[],
+        requestsSent:[]
+      },
+      dob:"",
+      email:"",
+      mobile:null,
+      OID:[],
+      BID:[],
+      Cart:[],
+      PID:[],
+      additionalInfo:{}
+    })
 
     const navigate=useNavigate()
 

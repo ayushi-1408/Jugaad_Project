@@ -29,12 +29,14 @@ import FooterPart from "./Components/footer";
 import ProductContext from "./Contexts/ProductsContext";
 import BlogsContext from "./Contexts/BlogsContext";
 import EventsContext from "./Contexts/EventsContext";
+import OrderContext from "./Contexts/OrderContext";
 
 function App() {
   const [user, setUser] = useState();
   const [products, setProducts] = useState();
   const [blogs, setBlogs] = useState();
   const [events, setEvents] = useState();
+  const [order, setOrder] = useState();
 
   // harshita.1470@gmail.com
   
@@ -50,13 +52,11 @@ function App() {
               <Route index element={<HomePage />} />
               
               <Route path="login" element={<LoginSignup />} />
-              <Route path="cart" element={<Cart />} />
               <Route path="about" element={<About />} />
               <Route path="events" element={<Events />} />
               <Route path="addEvent" element={<AddEvent />} />
               <Route path="addBlog" element={<AddBlog />} />
               <Route path="blogs" element={<Blogs />} />
-              <Route path="placeOrder/:id" element={<PlaceOrder />} />
               <Route path="events" element={<Events />} />
               <Route path="products" element={<Products />} />
               <Route path="addProduct" element={<AddProduct />} />
@@ -64,12 +64,15 @@ function App() {
               <Route path="userProfile" element={<UserProfile />} />
               <Route path="viewBlog/:id" element={<ViewFullProduct />} />
               <Route path="viewProduct/:id" element={<ViewFullProduct />} />
+
+              <Route path="cart" element={<Cart />} />
+              <Route path="placeOrder" element={<PlaceOrder />} />
+
             </Route>
             
           </Routes>
           <FooterPart/>
         </BrowserRouter>
-        
       </EventsContext.Provider>
       </BlogsContext.Provider>
       </ProductContext.Provider>

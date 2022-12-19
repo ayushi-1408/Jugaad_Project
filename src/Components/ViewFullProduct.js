@@ -26,6 +26,8 @@ function ViewFullProduct(props) {
   const { user, setUser } = useContext(UserContext);
   const auth = getAuth();
 
+  const [addToCart, setState ] = useState(true);
+
   const productCollectionRef = doc(db, "Products", id);
 
   const nav=useNavigate()
@@ -48,23 +50,24 @@ function ViewFullProduct(props) {
 
   useEffect(() => {
     const getProduct = async () => {
+      console.log(user.Cart)
       const data = await getDoc(productCollectionRef);
-      console.log(data.data());
+      user.Cart.forEach((product) => id === product.product ? setState(false) : console.log(product.product))
       setProduct(data.data());
     };
 
     getProduct();
-  }, []);
+  }, [!user]);
 
   const handleCart = () => {
-    console.log(auth.currentUser);
-    const userRef = doc(db, "Users", user);
+    
+    const userRef = doc(db, "Users", user.uid);
     const addToCart = async () => {
       //console.log(user)
       await updateDoc(userRef, {
-        Cart: arrayUnion(id),
+        Cart: arrayUnion({product:id, quantity:1}),
       });
-      console.log("updated cart");
+      setState(false);
     };
 
     addToCart();
@@ -92,9 +95,17 @@ function ViewFullProduct(props) {
           <Card.Body>
             <Card.Text>{product.description}</Card.Text>
           </Card.Body>
-          <Button variant="primary" type="submit" onClick={handleCart}>
+          {
+            addToCart === true ? (
+              <Button variant="primary" type="submit" onClick={handleCart}>
             Add to Cart
           </Button>
+            ) : (
+              <Button variant="light " disabled type="submit" onClick={handleCart}>
+            Added to Cart
+          </Button>
+            )
+          }
         </Card>
       </div>
       ) : (

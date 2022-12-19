@@ -1,4 +1,4 @@
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
+import { FacebookAuthProvider, getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, TwitterAuthProvider } from 'firebase/auth';
 import React, { useState } from 'react'
 import { useContext } from 'react';
 import Button from 'react-bootstrap/Button';
@@ -6,12 +6,32 @@ import Form from 'react-bootstrap/Form';
 import { Link, useNavigate } from 'react-router-dom';
 import UserContext from '../Contexts/UserContext';
 import {MDBContainer, MDBCol, MDBRow, MDBBtn, MDBIcon, MDBInput, MDBCheckbox } from 'mdb-react-ui-kit';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase-config';
 
 export default function LoginSignup() {
 
   const [loginUser,setLoginUser] = useState([])
+
+  const [newUser,setNewUser] = useState({
+    name:"",
+    password:"",
+    description:"",
+    address:"",
+    connections: {
+      connected:[],
+      requestsReceived:[],
+      requestsSent:[]
+    },
+    dob:"",
+    email:"",
+    mobile:null,
+    OID:[],
+    BID:[],
+    Cart:[],
+    PID:[],
+    additionalInfo:{}
+  })
 
   const {user,setUser} = useContext(UserContext)
 
@@ -24,7 +44,7 @@ export default function LoginSignup() {
 
     onAuthStateChanged(auth, (userr) => {
       if (userr) {
-        nav('/home')
+        nav('/')
       }
     });
 
@@ -49,26 +69,8 @@ export default function LoginSignup() {
     signInWithEmailAndPassword(auth, loginUser.email, loginUser.password)
       .then((userCredential) => {
     // Signed in 
-    const userr = userCredential.user;
-    //console.log(user)
-     if(userr.emailVerified) {
-         
-      const setUserName = async() => {
-        setUser({uid:userr.uid})
-       // console.log(user)
-
-        const userRef = doc(db, "Users", userr.uid);
-        const data = await getDoc(userRef);
-        setUser({...user,...data.data()})
-       // console.log(user)
-        navigate('/userProfile')
-       }
-
-       setUserName()
-     }
-     else {
-       alert("Verify email")
-     }
+    signIn(userCredential)
+    
   })
   .catch((error) => {
     const errorCode = error.code;
@@ -78,34 +80,85 @@ export default function LoginSignup() {
       
   }
 
+  const signInWithFacebook = () => {
+    const provider = new FacebookAuthProvider();
+    signInWithPopup(auth,provider)
+    .then((userCredential) => {
+      auth.currentUser.emailVerified=true;
+      console.log(auth.currentUser)
+      signIn(userCredential)
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      alert(errorMessage)
+    });
+  }
+
+  const signInWithGoogle = () => {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth,provider)
+    .then((userCredential) => {
+      console.log("yes")
+      console.log(userCredential)
+      auth.currentUser.emailVerified=true;
+      console.log(auth.currentUser)
+      signIn(userCredential)
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      alert(errorMessage)
+    });
+  }
+
+  const signInWithTwitter = () => {
+    const provider = new TwitterAuthProvider();
+    signInWithPopup(auth,provider)
+    .then((userCredential) => {
+      auth.currentUser.emailVerified=true;
+      console.log(auth.currentUser)
+      signIn(userCredential)
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      alert(errorMessage)
+    });
+  }
+
+  const signIn = (userCredential) => {
+    const userr = userCredential.user;
+    console.log(userr)
+    //console.log(user)
+     if(userr.emailVerified) {
+         
+      const setUserName = async() => {
+       // console.log(user)
+
+        const userRef = doc(db, "Users", userr.uid);
+        const data = await getDoc(userRef);
+        console.log(data)
+        if(!data.exists()) {
+          setDoc(userRef,newUser);
+          updateDoc(userRef,{email:userCredential.user.email,name:userCredential.user.displayName,mobile:userCredential.user.phoneNumber});
+        }
+        console.log(newUser)
+        
+       // console.log(user)
+        navigate('/userProfile')
+       }
+
+       setUserName()
+     }
+     else {
+       alert("Verify email")
+     }
+  }
+
 
   return (
     <>
-    {/* <div>
-      <Form>
-      <Form.Group className="mb-3" controlId="email">
-        <Form.Label>Email</Form.Label>
-        <Form.Control type="email" placeholder="email" onChange={handleInput} value={loginUser.email}/>
-      </Form.Group>
-      <Form.Group className="mb-3" controlId="password">
-        <Form.Label>Password</Form.Label>
-        <Form.Control type="password" placeholder="password" onChange={handleInput} value={loginUser.password}/>
-      </Form.Group>
-      <Button variant="primary" type="submit" onClick={handleLogin} >
-        Login
-      </Button>
-      </Form>
-      <div>
-      <Button variant="primary" type="submit" onClick={handleSignup} >
-        Signup
-      </Button>
-      </div>
-    </div>
-    */}
-
-
-  
-
 
     <MDBContainer fluid className="p-3 my-5 h-custom" style={{  width:' 100%',
   height: '100%', background: 'linear-gradient(to right, rgba(102, 126, 234, 0.5), rgba(118, 75, 162, 0.5))' , backgroundSize:'cover'}}>
@@ -122,16 +175,16 @@ export default function LoginSignup() {
 
             <p className="lead fw-normal mb-0 me-3">Sign in with</p>
 
-            <MDBBtn floating size='md' tag='a' className='me-2'>
-              <MDBIcon fab icon='fa fa-facebook' />
+            <MDBBtn floating size='md' tag='a'  className='me-2' onClick={signInWithGoogle}>
+              <MDBIcon fab icon='google' >G</MDBIcon>
             </MDBBtn>
 
-            <MDBBtn floating size='md' tag='a'  className='me-2'>
-              <MDBIcon fab icon='twitter' />
+            <MDBBtn floating size='md' tag='a' className='me-2' onClick={signInWithFacebook}>
+            <MDBIcon fab icon="fab fa-facebook-square" >F</MDBIcon>
             </MDBBtn>
 
-            <MDBBtn floating size='md' tag='a'  className='me-2'>
-              <MDBIcon fab icon='linkedin-in' />
+            <MDBBtn floating size='md' tag='a'  className='me-2' onClick={signInWithTwitter}>
+              <MDBIcon fab icon='twitter' >T</MDBIcon>
             </MDBBtn>
 
           </div>
