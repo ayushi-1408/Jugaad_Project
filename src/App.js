@@ -39,7 +39,6 @@ function App() {
   const [events, setEvents] = useState();
   const [order, setOrder] = useState();
 
-  // harshita.1470@gmail.com
   
   return (
     <div className="App">
@@ -62,9 +61,9 @@ function App() {
               <Route path="products" element={<Products />} />
               <Route path="addProduct" element={<AddProduct />} />
               <Route path="newUser" element={<NewUser />} />
-              <Route path="userProfile" element={<UserProfile />} />
-              <Route path="viewBlog/:id" element={<ViewFullBlog />} />
-              <Route path="viewProduct/:id" element={<ViewFullProduct />} />
+              <Route exact path="userProfile/:id" element={<UserProfile />} />
+              <Route exact path="viewBlog/:id" element={<ViewFullBlog />} />
+              <Route exact path="viewProduct/:id" element={<ViewFullProduct />} />
 
               <Route path="cart" element={<Cart />} />
               <Route path="placeOrder" element={<PlaceOrder />} />

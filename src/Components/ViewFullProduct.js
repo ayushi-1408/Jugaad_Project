@@ -52,11 +52,12 @@ function ViewFullProduct(props) {
 
   useEffect(() => {
     const getProduct = async () => {
-      console.log(user.Cart)
+      //console.log(user.Cart)
       const data = await getDoc(productCollectionRef);
       if(user.Cart !== undefined && user.Cart.length > 0 ) user.Cart.forEach((product) => id === product.product ? setStateCart(false) : console.log())
       if(user.WishPID !== undefined && user.WishPID.length > 0 ) user.WishPID.forEach((product) => id === product ? setStateWishList(false) : console.log())
       setProduct(data.data());
+      
     };
 
     getProduct();
@@ -72,7 +73,6 @@ function ViewFullProduct(props) {
       });
       setStateCart(false);
     };
-
     addToCart();
   };
 
@@ -148,6 +148,12 @@ function ViewFullProduct(props) {
           </Button>
             )
           }
+          <Link to={`/userProfile/${product.UID}/`} reloadDocument="true">
+          <Button variant="primary " type="submit" >
+            View this user profile
+          </Button>
+          </Link>
+          
         </Card>
       </div>
       ) : (
