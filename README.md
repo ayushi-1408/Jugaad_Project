@@ -19,7 +19,7 @@ Things to be viewed in User Profile -
 My Blogs       --everyone
 My Products    --everyone
 My Events      --everyone
-Connections    --everyone
+Connections    --everyone    --create modal showing names of connections which can be clicked to go to profile
 Name           --everyone
 Picture        --everyone
 Description    --everyone
