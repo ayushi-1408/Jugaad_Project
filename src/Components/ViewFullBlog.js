@@ -11,15 +11,18 @@ import {
   doc,
   updateDoc,
   arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 import UserContext from "../Contexts/UserContext";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import Spinner from "./Spinner";
 
 function ViewFullBlog(props) {
   const param = useParams();
   const { id } = param;
   console.log(id);
   const [blog, setblog] = useState();
+  const [save, setsave] = useState(true);
 
   const { user, setUser } = useContext(UserContext);
   const auth = getAuth();
@@ -49,6 +52,8 @@ function ViewFullBlog(props) {
   useEffect(() => {
     const getblog = async () => {
       const data = await getDoc(blogCollectionRef);
+      console.log(user)
+      if(user.SavedBID !== undefined && user.SavedBID.length > 0 ) user.SavedBID.forEach((blog) => id === blog ? setsave(false) : console.log())
       console.log(data.data());
       setblog(data.data());
     };
@@ -56,19 +61,34 @@ function ViewFullBlog(props) {
     getblog();
   }, []);
 
-  const handleCart = () => {
-    console.log(auth.currentUser);
-    const userRef = doc(db, "Users", user);
+  const handleSave = () => {
+    const userRef = doc(db, "Users", user.uid);
     const addToCart = async () => {
       //console.log(user)
       await updateDoc(userRef, {
-        Cart: arrayUnion(id),
+        SavedBID: arrayUnion(id),
       });
-      console.log("updated cart");
+      setsave(false)
+      console.log("updated saved blogs");
     };
 
     addToCart();
   };
+
+  const handleSaveRemove = () => {
+    const userRef = doc(db, "Users", user.uid);
+    const addToCart = async () => {
+      //console.log(user)
+      await updateDoc(userRef, {
+        SavedBID: arrayRemove(id),
+      });
+      setsave(true)
+      console.log("updated saved blogs");
+    };
+
+    addToCart();
+  };
+
 
   return (
     <>
@@ -92,9 +112,17 @@ function ViewFullBlog(props) {
         <Card.Body>
           <Card.Text>{blog.description}</Card.Text>
         </Card.Body>
-        <Button variant="primary" type="submit" onClick={handleCart}>
-          Add to Cart
-        </Button>
+        {
+            save === true ? (
+              <Button variant="light" type="submit" onClick={handleSave}>
+            Save
+          </Button>
+            ) : (
+              <Button variant="dark " type="submit" onClick={handleSaveRemove} >
+            Remove from Saved
+          </Button>
+            )
+          }
       </Card>
     </div>
       ) : (

@@ -3,13 +3,22 @@ import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { useContext } from "react";
 import { Card } from "react-bootstrap";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import UserContext from "../Contexts/UserContext";
 import { db } from "../firebase-config";
-import { MDBCol, MDBContainer, MDBRow, MDBCard, MDBCardText, MDBCardBody, MDBCardImage, MDBBtn, MDBTypography } from 'mdb-react-ui-kit';
+import { MDBCol, MDBContainer, MDBRow, MDBCard, MDBCardText, MDBCardBody, MDBCardImage, MDBBtn, MDBTypography, MDBRipple } from 'mdb-react-ui-kit';
 import Spinner from "./Spinner";
 export default function UserProfile() {
+
   const { user, setUser } = useContext(UserContext);
+
+  const [myBlogs, setMyBlogs] = useState([]);
+  const [myProducts, setMyProducts] = useState([]);
+  const [myEvents, setMyEvents] = useState([]);
+
+  const [savedBlogs, setSavedBlogs] = useState([]);
+  const [wishList, setWishList] = useState([]);
+  const [savedEvents, setSavedEvents] = useState([]);
 
 
   const auth = getAuth();
@@ -23,14 +32,117 @@ export default function UserProfile() {
         const getUser = async () => {
           const userRef = doc(db, "Users", userr.uid);
           const data = await getDoc(userRef);
+
+          
+          
+
+          
           setUser({...data.data(),uid:userr.uid})
+          // console.log(user)
+          // console.log("data is - ")
+          // console.log(myBlogs);
+          // console.log(myEvents)
+          // console.log(myProducts);
+          // console.log(savedBlogs)
+          // console.log(savedEvents)
+          // console.log(wishList)
+          // console.log("thats all")
         };
         getUser();
+        //console.log(user)
       } else {
         nav('/login')
       }
     });
   }
+
+  useEffect(() => {
+    //console.log(user)
+    if(user !== undefined) {
+
+      //MyProducts
+      user.PID.forEach((element) => {
+        const productCollectionRef = doc(db, "Products", element);
+        const getProduct = async () => {
+        const data = await getDoc(productCollectionRef);
+        const temp = data.data();
+       // console.log(temp)
+        temp.pid = element;
+        setMyProducts((arr) => [...arr, temp]);
+        //console.log(myProducts)
+        };
+        getProduct(); 
+      });
+      
+      //MyBlogs
+      user.BID.forEach((element) => {
+        const blogCollectionRef = doc(db, "Blogs", element);
+        const getBlog = async () => {
+        const data = await getDoc(blogCollectionRef);
+        const temp = data.data();
+       // console.log(temp)
+        temp.bid = element;
+        setMyBlogs((arr) => [...arr, temp]);
+        };
+        getBlog(); 
+      });
+
+      //MyEvents
+      user.EID.forEach((element) => {
+        //console.log(element)
+        const eventCollectionRef = doc(db, "Events", element);
+        const getEvent = async () => {
+        const data = await getDoc(eventCollectionRef);
+        const temp = data.data();
+        //console.log(data.data());
+        temp.eid = element;
+        setMyEvents((arr) => [...arr, temp]);
+        //console.log(myEvents)
+        };
+        getEvent(); 
+      });
+
+      //saved blogs
+      user.SavedBID.forEach((element) => {
+        const blogCollectionRef = doc(db, "Blogs", element);
+        const getBlog = async () => {
+        const data = await getDoc(blogCollectionRef);
+        const temp = data.data();
+        //console.log(temp)
+        temp.bid = element;
+        setSavedBlogs((arr) => [...arr, temp]);
+        };
+        getBlog(); 
+      });
+
+      //wishlist
+      user.WishPID.forEach((element) => {
+        const productCollectionRef = doc(db, "Products", element);
+        const getProduct = async () => {
+        const data = await getDoc(productCollectionRef);
+        const temp = data.data();
+        //console.log(temp)
+        temp.pid = element;
+        setWishList((arr) => [...arr, temp]);
+        };
+        getProduct(); 
+      });
+
+      //saved events
+      // user.SavedEID.forEach((element) => {
+      //   const eventCollectionRef = doc(db, "Events", element);
+      //   const getEvent = async () => {
+      //   const data = await getDoc(eventCollectionRef);
+      //   const temp = data.data();
+      //   //console.log(temp)
+      //   temp.eid = element.product;
+      //   setSavedEvents((arr) => [...arr, temp]);
+      //   };
+      //   getEvent(); 
+      // });
+    }
+
+  },[!user])
 
 
   return (
@@ -110,6 +222,7 @@ export default function UserProfile() {
           </MDBCol>
         </MDBRow>
       </MDBContainer>
+      
     </div>
     ) : (
       <Spinner/>

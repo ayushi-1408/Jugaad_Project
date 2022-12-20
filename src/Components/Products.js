@@ -73,7 +73,7 @@ export default function Products() {
   
         <MDBRow>
           {products.map((product) => (
-            <MDBCol md="12" lg="4" className="mb-4">
+            <MDBCol md="12" lg="4" className="mb-4" key={product.id}>
             <MDBCard>
               <MDBRipple
                 rippleColor="light"
