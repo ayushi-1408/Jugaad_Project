@@ -213,6 +213,7 @@ function Cart() {
 
                   <MDBBtn className="px-3 ms-2">
                     <MDBIcon fas icon="plus" />
+                    
                   </MDBBtn>
                 </div>
 
