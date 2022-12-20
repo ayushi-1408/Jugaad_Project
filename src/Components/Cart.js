@@ -1,5 +1,5 @@
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc, getDocs } from "firebase/firestore";
+import { browserPopupRedirectResolver, getAuth, onAuthStateChanged } from "firebase/auth";
+import { arrayRemove, arrayUnion, doc, getDoc, getDocs, updateDoc } from "firebase/firestore";
 import React, { useEffect } from "react";
 import { useState } from "react";
 import { useContext } from "react";
@@ -25,86 +25,92 @@ import {
   MDBTooltip,
   MDBTypography,
   } from "mdb-react-ui-kit";
+import Spinner from "./Spinner";
+import OrderContext from "../Contexts/OrderContext";
  
 function Cart() {
-  // const { user, setUser } = useContext(UserContext);
-  // const [cart, setCart] = useState([]);
-  // const auth = getAuth();
+  const { user, setUser } = useContext(UserContext);
+  const [cart, setCart] = useState();
+  const [sum,setSum] = useState(0);
+  const auth = getAuth();
 
-  // const nav=useNavigate()
+  const nav=useNavigate()
 
-  //   if(!user) {
-  //     onAuthStateChanged(auth, (userr) => {
-  //       if (userr) {
-  //         console.log(userr)
-  //         setUser(userr.uid)
-  //       } else {
-  //         console.log("not signed")
-  //         nav('/login')
-  //       }
-  //     });
-  //   }
+    if(user==undefined || user.uid == undefined) {
+      onAuthStateChanged(auth, (userr) => {
+        if (userr) {
+          console.log(userr)
+          setUser({uid:userr.uid})
+        } else {
+          console.log("not signed")
+          nav('/login')
+        }
+      });
+    }
 
-  // useEffect(() => {
-  //   const getCart = async () => {
-  //     const userRef = doc(db, "Users", user);
+    const handleInput = (e) => {
+      const userRef = doc(db, "Users", user.uid);
+      const name=e.target.name;
+      const value=e.target.value;
+      const val= -parseInt(cart[name].quantity)+parseInt(value);
+      setSum((sum) => sum+val*parseInt(cart[name].price));
+      const updateCart = async() => {
+        updateDoc(userRef, {
+           Cart: arrayRemove({product:cart[name].pid, quantity:cart[name].quantity})
+        });
+        updateDoc(userRef, {
+          Cart: arrayUnion({product:cart[name].pid, quantity:value})
+       });
+       setCart(cart.map((product) => 
+        product.pid===cart[name].pid? {...product,quantity:value} : {...product}
+      )
+      );
+      }
+      updateCart();
+  }
 
-  //     //console.log(auth.currentUser)
-  //     const data = await getDoc(userRef);
-  //     console.log(data.data().Cart);
-  //     data.data().Cart.forEach((element) => {
-  //       const productCollectionRef = doc(db, "Products", element);
-  //       const getProduct = async () => {
-  //         const data = await getDoc(productCollectionRef);
-  //         const temp = data.data();
-  //         temp.id = data.id;
-  //         // setPrice(price+temp.price)
-  //         setCart((arr) => [...arr, temp]);
-  //       };
-  //       getProduct();
-  //     });
-  //   };
-  //   getCart();
-  //   //console.log(auth.currentUser)
-  // }, [!user]);
+  const handleRemove = (e) => {
+    console.log("removing")
+    const userRef = doc(db, "Users", user.uid);
+    const name=e.target.name;
+    const val= -parseInt(cart[name].quantity);
+    setSum((sum) => sum+val*parseInt(cart[name].price));
+    const updateCart = async() => {
+      updateDoc(userRef, {
+         Cart: arrayRemove({product:cart[name].pid, quantity:cart[name].quantity})
+      });
+      setCart((products) => (
+        products.filter((product) => product.pid !== cart[name].pid)
+      ));
+    }
+    updateCart();
+  }
+    
+
+  useEffect(() => {
+    const getCart = async () => {
+      const userRef = doc(db, "Users", user.uid);
+      const data = await getDoc(userRef);
+      setUser({...user, name:data.data().name})
+      setCart([])
+      data.data().Cart.forEach((element) => {
+        const productCollectionRef = doc(db, "Products", element.product);
+        const getProduct = async () => {
+        const data = await getDoc(productCollectionRef);
+        const temp = data.data();
+        console.log(temp)
+        temp.quantity=element.quantity;
+        temp.pid = element.product;
+        setSum((sum) => temp.price*temp.quantity+sum);
+        setCart((arr) => [...arr, temp]);
+        };
+        getProduct(); 
+      });
+    };
+    if(user !== undefined) getCart();
+  }, [!user]);
 
   return (
-    // <div>
-    //   <Row xs={1} md={2} className="g-4">
-    //     {cart.map((product) => (
-    //       <Col>
-    //         <Link
-    //           to={`/viewProduct/${product.id}`}
-    //           style={{ textDecoration: "none", color: "black" }}
-    //         >
-    //           <Card key={product.id}>
-    //             <p style={{ alignContent: "center" }}>
-    //               <Card.Img
-    //                 variant="top"
-    //                 src={product.image}
-    //                 style={{ maxWidth: "100px", maxHeight: "100px" }}
-    //               />
-    //             </p>
-
-    //             <Card.Body className="col-md-6 align-self-center">
-    //               <Card.Title>{product.title}</Card.Title>
-    //               <Card.Text>{product.description}</Card.Text>
-    //               <Card.Text>{product.price}</Card.Text>
-    //             </Card.Body>
-    //           </Card>
-    //         </Link>
-    //         <Link to={`/placeOrder/${product.id}`}>
-    //           <Button variant="primary" type="submit" name={product.id}>
-    //             Continue to order
-    //           </Button>
-    //         </Link>
-    //       </Col>
-    //     ))}
-    //   </Row>
-    //   {/* <div>
-    //   Total price is {price}
-    // </div> */}
-    // </div>
     <>
    
 
@@ -213,7 +219,6 @@ function Cart() {
 
                   <MDBBtn className="px-3 ms-2">
                     <MDBIcon fas icon="plus" />
-                    
                   </MDBBtn>
                 </div>
 

@@ -11,15 +11,18 @@ import {
   doc,
   updateDoc,
   arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 import UserContext from "../Contexts/UserContext";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import Spinner from "./Spinner";
 
 function ViewFullBlog(props) {
   const param = useParams();
   const { id } = param;
   console.log(id);
-  const [blog, setblog] = useState([]);
+  const [blog, setblog] = useState();
+  const [save, setsave] = useState(true);
 
   const { user, setUser } = useContext(UserContext);
   const auth = getAuth();
@@ -28,23 +31,29 @@ function ViewFullBlog(props) {
 
   const nav=useNavigate()
 
-    if(!user) {
-      onAuthStateChanged(auth, (userr) => {
-        if (userr) {
-          console.log(userr)
-          setUser(userr.uid)
-        } else {
-          console.log("not signed")
-          nav('/login')
-        }
-      });
-    }
+  if (user==undefined || user.uid == undefined) {
+    onAuthStateChanged(auth, (userr) => {
+      if (userr) {
+       // console.log(userr);
+        const getUser = async () => {
+          const userRef = doc(db, "Users", userr.uid);
+          const data = await getDoc(userRef);
+          setUser({...data.data(),uid:userr.uid})
+        };
+        getUser();
+      } else {
+        nav('/login')
+      }
+    });
+  }
 
-  console.log(user);
+
 
   useEffect(() => {
     const getblog = async () => {
       const data = await getDoc(blogCollectionRef);
+      console.log(user)
+      if(user.SavedBID !== undefined && user.SavedBID.length > 0 ) user.SavedBID.forEach((blog) => id === blog ? setsave(false) : console.log())
       console.log(data.data());
       setblog(data.data());
     };
@@ -52,22 +61,40 @@ function ViewFullBlog(props) {
     getblog();
   }, []);
 
-  const handleCart = () => {
-    console.log(auth.currentUser);
-    const userRef = doc(db, "Users", user);
+  const handleSave = () => {
+    const userRef = doc(db, "Users", user.uid);
     const addToCart = async () => {
       //console.log(user)
       await updateDoc(userRef, {
-        Cart: arrayUnion(id),
+        SavedBID: arrayUnion(id),
       });
-      console.log("updated cart");
+      setsave(false)
+      console.log("updated saved blogs");
     };
 
     addToCart();
   };
 
+  const handleSaveRemove = () => {
+    const userRef = doc(db, "Users", user.uid);
+    const addToCart = async () => {
+      //console.log(user)
+      await updateDoc(userRef, {
+        SavedBID: arrayRemove(id),
+      });
+      setsave(true)
+      console.log("updated saved blogs");
+    };
+
+    addToCart();
+  };
+
+
   return (
-    <div>
+    <>
+    {
+      blog !== undefined ? (
+        <div>
       <Card>
         <p style={{ alignContent: "center" }}>
           <Card.Img
@@ -85,11 +112,25 @@ function ViewFullBlog(props) {
         <Card.Body>
           <Card.Text>{blog.description}</Card.Text>
         </Card.Body>
-        <Button variant="primary" type="submit" onClick={handleCart}>
-          Add to Cart
-        </Button>
+        {
+            save === true ? (
+              <Button variant="light" type="submit" onClick={handleSave}>
+            Save
+          </Button>
+            ) : (
+              <Button variant="dark " type="submit" onClick={handleSaveRemove} >
+            Remove from Saved
+          </Button>
+            )
+          }
       </Card>
     </div>
+      ) : (
+        <Spinner/>
+      )
+    }
+    </>
+    
   );
 }
 

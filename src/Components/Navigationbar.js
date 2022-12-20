@@ -1,26 +1,40 @@
-import React from "react";
+import { getAuth, signOut } from "firebase/auth";
+import React, { useContext } from "react";
 import { Button } from "react-bootstrap";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import { Link, Outlet, useNavigate } from "react-router-dom";
+import UserContext from "../Contexts/UserContext";
 import Logout from "./Logout";
 
 function Navigationbar() {
   const nav = useNavigate();
+  const {user, setUser } = useContext(UserContext);
+
+ 
 
   const handleLogout = (e) => {
     e.preventDefault();
-    Logout();
-
+    const auth = getAuth();
+    signOut(auth)
+      .then(() => {
+          console.log("logged out")
+          setUser();
+          console.log(user);
+      })
+      .catch((error) => {
+        console.log(error)
+      });
     nav("/");
   };
+
   return (
     <div>
-      <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark"  fixed="top" >
+      <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark"  fixed="top" position="relative" >
         <Container>
-          <Navbar.Brand href="#home">JUGAAD</Navbar.Brand>
+          <Navbar.Brand href="/">JUGAAD</Navbar.Brand>
           <Navbar.Toggle aria-controls="responsive-navbar-nav" />
           <Navbar.Collapse id="responsive-navbar-nav">
             <Nav className="me-auto">
@@ -58,23 +72,31 @@ function Navigationbar() {
                 Cart
               </Link>{' '}
               
-              <Link
-                to="/userProfile"
-                style={{ textDecoration: "none", color: "white" ,marginRight: '15px'}}
-                
-              >
-               
-               Profile
-              </Link>
             </Nav>
             <Nav>
-              <Button onClick={handleLogout}>Logout</Button>
-              <Link
-                to="/login"
-                style={{ textDecoration: "none", color: "white",}}
-              >
-                Login/Signup
-              </Link>
+              {user !== undefined && user.uid !== undefined ? (
+                <>
+                  <Link
+                    id="userName"
+                    to="/userProfile"
+                    style={{ textDecoration: "none", color: "white" }}
+                  >
+                    {user.name}
+                  </Link>
+
+                  <Button variant="danger" onClick={handleLogout} >
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <Link
+                  id="login"
+                  to="/login"
+                  style={{ textDecoration: "none", color: "white" }}
+                >
+                  Login/Signup
+                </Link>
+              )}
             </Nav>
           </Navbar.Collapse>
         </Container>

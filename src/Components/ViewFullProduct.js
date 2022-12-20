@@ -12,85 +12,149 @@ import {
   doc,
   updateDoc,
   arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 import UserContext from "../Contexts/UserContext";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import Spinner from "./Spinner";
 
 function ViewFullProduct(props) {
   const param = useParams();
   const { id } = param;
   console.log(id);
-  const [product, setProduct] = useState([]);
+  const [product, setProduct] = useState();
 
   const { user, setUser } = useContext(UserContext);
   const auth = getAuth();
+
+  const [addToCart, setStateCart ] = useState(true);
+  const [addToWishList, setStateWishList ] = useState(true);
 
   const productCollectionRef = doc(db, "Products", id);
 
   const nav=useNavigate()
 
-    if(!user) {
-      onAuthStateChanged(auth, (userr) => {
-        if (userr) {
-          console.log(userr)
-          setUser(userr.uid)
-        } else {
-          console.log("not signed")
-          nav('/login')
-        }
-      });
-    }
-
-  console.log(user);
+  if (user==undefined || user.uid == undefined) {
+    onAuthStateChanged(auth, (userr) => {
+      if (userr) {
+       // console.log(userr);
+        const getUser = async () => {
+          const userRef = doc(db, "Users", userr.uid);
+          const data = await getDoc(userRef);
+          setUser({...data.data(),uid:userr.uid})
+        };
+        getUser();
+      } else {
+        nav('/login')
+      }
+    });
+  }
 
   useEffect(() => {
     const getProduct = async () => {
+      console.log(user.Cart)
       const data = await getDoc(productCollectionRef);
-      console.log(data.data());
+      if(user.Cart !== undefined && user.Cart.length > 0 ) user.Cart.forEach((product) => id === product.product ? setStateCart(false) : console.log())
+      if(user.WishPID !== undefined && user.WishPID.length > 0 ) user.WishPID.forEach((product) => id === product ? setStateWishList(false) : console.log())
       setProduct(data.data());
     };
 
     getProduct();
-  }, []);
+  }, [!user]);
 
   const handleCart = () => {
-    console.log(auth.currentUser);
-    const userRef = doc(db, "Users", user);
+    
+    const userRef = doc(db, "Users", user.uid);
     const addToCart = async () => {
       //console.log(user)
       await updateDoc(userRef, {
-        Cart: arrayUnion(id),
+        Cart: arrayUnion({product:id, quantity:1}),
       });
-      console.log("updated cart");
+      setStateCart(false);
     };
 
     addToCart();
   };
 
+  const addWishList = () => {
+    
+    const userRef = doc(db, "Users", user.uid);
+    const addToWishList = async () => {
+      //console.log(user)
+      await updateDoc(userRef, {
+        WishPID: arrayUnion(id),
+      });
+      setStateWishList(false);
+    };
+
+    addToWishList();
+  };
+
+  const removeWishList = () => {
+    
+    const userRef = doc(db, "Users", user.uid);
+    const remWishList = async () => {
+      //console.log(user)
+      await updateDoc(userRef, {
+        WishPID: arrayRemove(id),
+      });
+      setStateWishList(true);
+    };
+
+    remWishList();
+  };
+
   return (
-    <div>
-      <Card>
-        <p style={{ alignContent: "center" }}>
-          <Card.Img
-            variant="top"
-            src={product.image}
-            style={{ maxWidth: "100px", maxHeight: "100px" }}
-          />
-        </p>
-        <Card.Body>
-          <Card.Text>{product.title}</Card.Text>
-        </Card.Body>
-      </Card>
-      <br />
-      <Card>
-        <Card.Body>
-          <Card.Text>{product.description}</Card.Text>
-        </Card.Body>
-        <Button variant="primary" type="submit" onClick={handleCart}>
-          Add to Cart
-        </Button>
-      </Card>
-    </div>
+    <>
+    {
+      product !== undefined ? (
+        <div>
+        <Card>
+          <p style={{ alignContent: "center" }}>
+            <Card.Img
+              variant="top"
+              src={product.image}
+              style={{ maxWidth: "100px", maxHeight: "100px" }}
+            />
+          </p>
+          <Card.Body>
+            <Card.Text>{product.title}</Card.Text>
+          </Card.Body>
+        </Card>
+        <br />
+        <Card>
+          <Card.Body>
+            <Card.Text>{product.description}</Card.Text>
+          </Card.Body>
+          {
+            addToCart === true ? (
+              <Button variant="primary" type="submit" onClick={handleCart}>
+            Add to Cart
+          </Button>
+            ) : (
+              <Button variant="light " disabled type="submit" >
+            Added to Cart
+          </Button>
+            )
+          }
+          {
+            addToWishList === true ? (
+              <Button variant="light" type="submit" onClick={addWishList}>
+            Add to WishList
+          </Button>
+            ) : (
+              <Button variant="dark " type="submit" onClick={removeWishList}>
+            Remove from WishList
+          </Button>
+            )
+          }
+        </Card>
+      </div>
+      ) : (
+        <Spinner/>
+      )
+    }
+    </>
   );
 }
 

@@ -25,38 +25,58 @@ import AddEvent from "./Components/AddEvent";
 import PlaceOrder from "./Components/PlaceOrder";
 import { useState } from "react";
 import AddBlog from "./Components/AddBlog";
-import Appa from "./Components/footer";
+import FooterPart from "./Components/footer";
+import ProductContext from "./Contexts/ProductsContext";
+import BlogsContext from "./Contexts/BlogsContext";
+import EventsContext from "./Contexts/EventsContext";
+import OrderContext from "./Contexts/OrderContext";
+import ViewFullBlog from "./Components/ViewFullBlog";
+
 function App() {
   const [user, setUser] = useState();
+  const [products, setProducts] = useState();
+  const [blogs, setBlogs] = useState();
+  const [events, setEvents] = useState();
+  const [order, setOrder] = useState();
+
+  // harshita.1470@gmail.com
   
   return (
     <div className="App">
       <UserContext.Provider value={{ user, setUser }}>
+      <ProductContext.Provider value={{ products, setProducts }}>
+      <BlogsContext.Provider value={{ blogs, setBlogs }}>
+      <EventsContext.Provider value={{events, setEvents }}>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Navigationbar />}>
+              <Route path="/" element={<Navigationbar />}>
               <Route index element={<HomePage />} />
               
               <Route path="login" element={<LoginSignup />} />
-              <Route path="cart" element={<Cart />} />
               <Route path="about" element={<About />} />
               <Route path="events" element={<Events />} />
               <Route path="addEvent" element={<AddEvent />} />
               <Route path="addBlog" element={<AddBlog />} />
               <Route path="blogs" element={<Blogs />} />
-              <Route path="placeOrder/:id" element={<PlaceOrder />} />
               <Route path="events" element={<Events />} />
               <Route path="products" element={<Products />} />
               <Route path="addProduct" element={<AddProduct />} />
               <Route path="newUser" element={<NewUser />} />
               <Route path="userProfile" element={<UserProfile />} />
-              <Route path="viewBlog/:id" element={<ViewFullProduct />} />
+              <Route path="viewBlog/:id" element={<ViewFullBlog />} />
               <Route path="viewProduct/:id" element={<ViewFullProduct />} />
+
+              <Route path="cart" element={<Cart />} />
+              <Route path="placeOrder" element={<PlaceOrder />} />
+
             </Route>
             
           </Routes>
+          <FooterPart/>
         </BrowserRouter>
-        
+      </EventsContext.Provider>
+      </BlogsContext.Provider>
+      </ProductContext.Provider>
       </UserContext.Provider>
     </div>
   );

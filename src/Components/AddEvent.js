@@ -7,31 +7,45 @@ import {addDoc, arrayUnion, collection , doc, getDoc, getDocs, setDoc, updateDoc
 import UserContext from '../Contexts/UserContext';
 import { Link, redirect, useNavigate } from 'react-router-dom';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import EventsContext from '../Contexts/EventsContext';
 
 
 function AddEvent() {
-    const [newEvent,setNewEvent] = useState([])
+    const [newEvent,setNewEvent] = useState({
+      title:"",
+      dateOfPosting:new Date(),
+      dateOfEvent:new Date(),
+      description:"",
+      address:"",
+      city:"",
+      categories:[],
+    })
     const eventCollectionRef = collection(db , "Events" )
 
     const {user,setUser}= useContext(UserContext)
+    const {events, setEvents} = useContext(EventsContext)
 
-    const userData=[{}]
 
     const auth=getAuth()
 
     const nav=useNavigate()
 
-    if(!user) {
+    if (user==undefined || user.uid == undefined) {
       onAuthStateChanged(auth, (userr) => {
         if (userr) {
-          console.log(userr)
-          setUser(userr.uid)
+         // console.log(userr);
+          const getUser = async () => {
+            const userRef = doc(db, "Users", userr.uid);
+            const data = await getDoc(userRef);
+            setUser({...data.data(),uid:userr.uid})
+          };
+          getUser();
         } else {
-          console.log("not signed")
           nav('/login')
         }
       });
     }
+  
 
     const handleInput = (e) => {
         const name=e.target.placeholder;
@@ -53,6 +67,9 @@ function AddEvent() {
             PID:arrayUnion(ref1.id)
             })
             console.log("updated user")
+            setEvents();
+            setUser();
+            nav('/userProfile');
          }
      
          addEvent();

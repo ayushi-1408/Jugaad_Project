@@ -1,10 +1,33 @@
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import { MDBRipple ,MDBContainer, MDBTypography} from 'mdb-react-ui-kit';
 import {
  
   MDBCol,
   MDBRow,
 } from 'mdb-react-ui-kit';
+import { useContext } from 'react';
+import UserContext from '../Contexts/UserContext';
+import { db } from '../firebase-config';
+
 const a=function Component() {
+
+  const { user, setUser } = useContext(UserContext);
+  const auth = getAuth();
+
+  if (user === undefined || user.uid === undefined) {
+    onAuthStateChanged(auth, (userr) => {
+      if (userr) {
+       // console.log(userr);
+        const getUser = async () => {
+          const userRef = doc(db, "Users", userr.uid);
+          const data = await getDoc(userRef);
+          setUser({...data.data(),uid:userr.uid})
+        };
+        getUser();
+      } 
+    });
+  }
   return (
   <>
     <MDBRipple rippleTag='div' className='bg-image hover-overlay hover-zoom hover-shadow'>

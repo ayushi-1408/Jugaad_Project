@@ -3,69 +3,154 @@ import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { useContext } from "react";
 import { Card } from "react-bootstrap";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import UserContext from "../Contexts/UserContext";
 import { db } from "../firebase-config";
-import { MDBCol, MDBContainer, MDBRow, MDBCard, MDBCardText, MDBCardBody, MDBCardImage, MDBBtn, MDBTypography } from 'mdb-react-ui-kit';
-
+import { MDBCol, MDBContainer, MDBRow, MDBCard, MDBCardText, MDBCardBody, MDBCardImage, MDBBtn, MDBTypography, MDBRipple } from 'mdb-react-ui-kit';
+import Spinner from "./Spinner";
 export default function UserProfile() {
-  // const { user, setUser } = useContext(UserContext);
 
-  // const [userData, setUserData] = useState({});
+  const { user, setUser } = useContext(UserContext);
 
-  // const auth = getAuth();
+  const [myBlogs, setMyBlogs] = useState([]);
+  const [myProducts, setMyProducts] = useState([]);
+  const [myEvents, setMyEvents] = useState([]);
 
-  // const nav=useNavigate()
+  const [savedBlogs, setSavedBlogs] = useState([]);
+  const [wishList, setWishList] = useState([]);
+  const [savedEvents, setSavedEvents] = useState([]);
 
-  // if (!user) {
-  //   onAuthStateChanged(auth, (userr) => {
-  //     if (userr) {
-  //       console.log(userr);
-  //       setUser(userr.uid);
-  //     } else {
-  //       nav('/login')
-  //     }
-  //   });
-  // }
 
-  // useEffect(() => {
-  //   const getUser = async () => {
-  //     const userRef = doc(db, "Users", user);
-  //     const data = await getDoc(userRef);
-  //     console.log(data.data());
-  //     setUserData(data.data());
-  //   };
-  //   getUser();
-  // }, [!user]);
+  const auth = getAuth();
+
+  const nav=useNavigate()
+
+  if (user==undefined || user.uid == undefined) {
+    onAuthStateChanged(auth, (userr) => {
+      if (userr) {
+       // console.log(userr);
+        const getUser = async () => {
+          const userRef = doc(db, "Users", userr.uid);
+          const data = await getDoc(userRef);
+
+          
+          
+
+          
+          setUser({...data.data(),uid:userr.uid})
+          // console.log(user)
+          // console.log("data is - ")
+          // console.log(myBlogs);
+          // console.log(myEvents)
+          // console.log(myProducts);
+          // console.log(savedBlogs)
+          // console.log(savedEvents)
+          // console.log(wishList)
+          // console.log("thats all")
+        };
+        getUser();
+        //console.log(user)
+      } else {
+        nav('/login')
+      }
+    });
+  }
+
+  useEffect(() => {
+    //console.log(user)
+    if(user !== undefined) {
+
+      //MyProducts
+      user.PID.forEach((element) => {
+        const productCollectionRef = doc(db, "Products", element);
+        const getProduct = async () => {
+        const data = await getDoc(productCollectionRef);
+        const temp = data.data();
+       // console.log(temp)
+        temp.pid = element;
+        setMyProducts((arr) => [...arr, temp]);
+        //console.log(myProducts)
+        };
+        getProduct(); 
+      });
+      
+      //MyBlogs
+      user.BID.forEach((element) => {
+        const blogCollectionRef = doc(db, "Blogs", element);
+        const getBlog = async () => {
+        const data = await getDoc(blogCollectionRef);
+        const temp = data.data();
+       // console.log(temp)
+        temp.bid = element;
+        setMyBlogs((arr) => [...arr, temp]);
+        };
+        getBlog(); 
+      });
+
+      //MyEvents
+      user.EID.forEach((element) => {
+        //console.log(element)
+        const eventCollectionRef = doc(db, "Events", element);
+        const getEvent = async () => {
+        const data = await getDoc(eventCollectionRef);
+        const temp = data.data();
+        //console.log(data.data());
+        temp.eid = element;
+        setMyEvents((arr) => [...arr, temp]);
+        //console.log(myEvents)
+        };
+        getEvent(); 
+      });
+
+      //saved blogs
+      user.SavedBID.forEach((element) => {
+        const blogCollectionRef = doc(db, "Blogs", element);
+        const getBlog = async () => {
+        const data = await getDoc(blogCollectionRef);
+        const temp = data.data();
+        //console.log(temp)
+        temp.bid = element;
+        setSavedBlogs((arr) => [...arr, temp]);
+        };
+        getBlog(); 
+      });
+
+      //wishlist
+      user.WishPID.forEach((element) => {
+        const productCollectionRef = doc(db, "Products", element);
+        const getProduct = async () => {
+        const data = await getDoc(productCollectionRef);
+        const temp = data.data();
+        //console.log(temp)
+        temp.pid = element;
+        setWishList((arr) => [...arr, temp]);
+        };
+        getProduct(); 
+      });
+
+      //saved events
+      // user.SavedEID.forEach((element) => {
+      //   const eventCollectionRef = doc(db, "Events", element);
+      //   const getEvent = async () => {
+      //   const data = await getDoc(eventCollectionRef);
+      //   const temp = data.data();
+      //   //console.log(temp)
+      //   temp.eid = element.product;
+      //   setSavedEvents((arr) => [...arr, temp]);
+      //   };
+      //   getEvent(); 
+      // });
+    }
+
+  },[!user])
 
 
   return (
     <>
-    {/* <div>
-      <Card>
-        <Card.Body>
-          <Card.Text>{userData.name}</Card.Text>
-        </Card.Body>
-        <Card.Body>
-          <Card.Text>{userData.mobile}</Card.Text>
-        </Card.Body>
-        <Card.Body>
-          <Card.Text>{userData.email}</Card.Text>
-        </Card.Body>
-        <Card.Body>
-          <Card.Text>{userData.address}</Card.Text>
-        </Card.Body>
-        <Card.Body>
-          <Card.Text>{userData.dob}</Card.Text>
-        </Card.Body>
-        <Card.Body>
-          <Card.Text>{userData.description}</Card.Text>
-        </Card.Body>
-      </Card>
-    </div> */}
     
-
-    <div className="gradient-custom-2" style={{ backgroundColor: '#9de2ff' }}>
+   {
+    user !== undefined ? (
+      <div className="gradient-custom-2" style={{ backgroundColor: '#9de2ff' }}>
       <MDBContainer className="py-5 h-100">
         <MDBRow className="justify-content-center align-items-center h-100">
           <MDBCol lg="9" xl="7">
@@ -79,7 +164,7 @@ export default function UserProfile() {
                   </MDBBtn>
                 </div>
                 <div className="ms-3" style={{ marginTop: '130px' }}>
-                  <MDBTypography tag="h5">Name</MDBTypography>
+                  <MDBTypography tag="h5">{user.name}</MDBTypography>
                   <MDBCardText>Place</MDBCardText>
                 </div>
               </div>
@@ -103,9 +188,9 @@ export default function UserProfile() {
                 <div className="mb-5">
                   <p className="lead fw-normal mb-1">About</p>
                   <div className="p-4" style={{ backgroundColor: '#f8f9fa' }}>
-                    <MDBCardText className="font-italic mb-1">Web Developer</MDBCardText>
-                    <MDBCardText className="font-italic mb-1">Lives in New York</MDBCardText>
-                    <MDBCardText className="font-italic mb-0">Photographer</MDBCardText>
+                    <MDBCardText className="font-italic mb-1">{user.description}</MDBCardText>
+                    {/* <MDBCardText className="font-italic mb-1">Lives in New York</MDBCardText>
+                    <MDBCardText className="font-italic mb-0">Photographer</MDBCardText> */}
                   </div>
                 </div>
                 <div className="d-flex justify-content-between align-items-center mb-4">
@@ -137,7 +222,13 @@ export default function UserProfile() {
           </MDBCol>
         </MDBRow>
       </MDBContainer>
+      
     </div>
+    ) : (
+      <Spinner/>
+    )
+   }
+    
  
     </>
   );
