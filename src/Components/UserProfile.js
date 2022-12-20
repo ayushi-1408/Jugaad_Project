@@ -3,233 +3,470 @@ import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { useContext } from "react";
 import { Card } from "react-bootstrap";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import UserContext from "../Contexts/UserContext";
 import { db } from "../firebase-config";
-import { MDBCol, MDBContainer, MDBRow, MDBCard, MDBCardText, MDBCardBody, MDBCardImage, MDBBtn, MDBTypography, MDBRipple } from 'mdb-react-ui-kit';
+import {
+  MDBCol,
+  MDBContainer,
+  MDBRow,
+  MDBCard,
+  MDBCardText,
+  MDBCardBody,
+  MDBCardImage,
+  MDBBtn,
+  MDBTypography,
+  MDBRipple,
+} from "mdb-react-ui-kit";
 import Spinner from "./Spinner";
-export default function UserProfile() {
+
+export default function UserProfile(props) {
+  const param = useParams();
+  const { id } = param;
+  console.log("User to be seen " + id);
 
   const { user, setUser } = useContext(UserContext);
 
-  const [myBlogs, setMyBlogs] = useState([]);
-  const [myProducts, setMyProducts] = useState([]);
-  const [myEvents, setMyEvents] = useState([]);
+  const [viewUserProfile, setViewUserProfile] = useState();
 
-  const [savedBlogs, setSavedBlogs] = useState([]);
-  const [wishList, setWishList] = useState([]);
-  const [savedEvents, setSavedEvents] = useState([]);
+  console.log(user);
+  console.log(viewUserProfile);
 
+  const [myBlogs, setMyBlogs] = useState();
+  const [myProducts, setMyProducts] = useState();
+  const [myEvents, setMyEvents] = useState();
+
+  const [savedBlogs, setSavedBlogs] = useState();
+  const [wishList, setWishList] = useState();
+  const [savedEvents, setSavedEvents] = useState();
 
   const auth = getAuth();
 
-  const nav=useNavigate()
+  const nav = useNavigate();
 
-  if (user==undefined || user.uid == undefined) {
+  if (user === undefined) {
+    console.log("0");
     onAuthStateChanged(auth, (userr) => {
       if (userr) {
-       // console.log(userr);
         const getUser = async () => {
           const userRef = doc(db, "Users", userr.uid);
           const data = await getDoc(userRef);
-
-          
-          
-
-          
-          setUser({...data.data(),uid:userr.uid})
-          // console.log(user)
-          // console.log("data is - ")
-          // console.log(myBlogs);
-          // console.log(myEvents)
-          // console.log(myProducts);
-          // console.log(savedBlogs)
-          // console.log(savedEvents)
-          // console.log(wishList)
-          // console.log("thats all")
+          setUser({ ...data.data(), uid: userr.uid });
         };
         getUser();
-        //console.log(user)
       } else {
-        nav('/login')
+        nav("/login");
       }
     });
   }
 
   useEffect(() => {
-    //console.log(user)
-    if(user !== undefined) {
+    console.log("1");
+    const getProfile = async () => {
+      console.log("2");
+      if (user.uid === id) {
+        setViewUserProfile({ ...user });
+      } else {
+        const userRef = doc(db, "Users", id);
+        const dataa = await getDoc(userRef);
+        setViewUserProfile({ ...dataa.data() });
+      }
+    };
 
-      //MyProducts
-      user.PID.forEach((element) => {
-        const productCollectionRef = doc(db, "Products", element);
-        const getProduct = async () => {
-        const data = await getDoc(productCollectionRef);
-        const temp = data.data();
-       // console.log(temp)
-        temp.pid = element;
-        setMyProducts((arr) => [...arr, temp]);
-        //console.log(myProducts)
-        };
-        getProduct(); 
-      });
+    if (user !== undefined) getProfile();
+  }, [user]);
+
+  useEffect(() => {
+    const getData = async () => {
+      //wishlist
       
+    };
+
+    if (user !== undefined && viewUserProfile !== undefined) {
+      getData();
+    }
+  }, [viewUserProfile]);
+
+  useEffect(() => {
+    const getData = async () => {
+      //MyProducts
+      if (myProducts === undefined) {
+        setMyProducts([]);
+        console.log("MYProducts")
+        if (viewUserProfile.PID !== undefined)
+          viewUserProfile.PID.forEach((element) => {
+            console.log("Hey2");
+            const productCollectionRef = doc(db, "Products", element);
+            const getProduct = async () => {
+              const data = await getDoc(productCollectionRef);
+              const temp = data.data();
+              // console.log(temp)
+              temp.pid = element;
+              setMyProducts((arr) => [...arr, temp]);
+              console.log(myProducts);
+            };
+            getProduct();
+          });
+      }
+
+      //WishList
+      if (wishList === undefined) {
+        setWishList([]);
+        console.log("wishlist")
+        if (viewUserProfile.WishPID !== undefined)
+          viewUserProfile.WishPID.forEach((element) => {
+            console.log("hey1")
+            const productCollectionRef = doc(db, "Products", element);
+            const getProduct = async () => {
+              const data = await getDoc(productCollectionRef);
+              const temp = data.data();
+              //console.log(temp)
+              temp.pid = element;
+              setWishList((arr) => [...arr, temp]);
+            };
+            getProduct();
+          });
+      }
+
       //MyBlogs
-      user.BID.forEach((element) => {
-        const blogCollectionRef = doc(db, "Blogs", element);
-        const getBlog = async () => {
-        const data = await getDoc(blogCollectionRef);
-        const temp = data.data();
-       // console.log(temp)
-        temp.bid = element;
-        setMyBlogs((arr) => [...arr, temp]);
-        };
-        getBlog(); 
-      });
+      if (myBlogs === undefined) {
+        setMyBlogs([]);
+        if (viewUserProfile.BID !== undefined)
+          viewUserProfile.BID.forEach((element) => {
+            const blogCollectionRef = doc(db, "Blogs", element);
+            const getBlog = async () => {
+              const data = await getDoc(blogCollectionRef);
+              const temp = data.data();
+              // console.log(temp)
+              temp.bid = element;
+              setMyBlogs((arr) => [...arr, temp]);
+              console.log(myBlogs);
+            };
+            getBlog();
+          });
+      }
 
       //MyEvents
-      user.EID.forEach((element) => {
-        //console.log(element)
-        const eventCollectionRef = doc(db, "Events", element);
-        const getEvent = async () => {
-        const data = await getDoc(eventCollectionRef);
-        const temp = data.data();
-        //console.log(data.data());
-        temp.eid = element;
-        setMyEvents((arr) => [...arr, temp]);
-        //console.log(myEvents)
-        };
-        getEvent(); 
-      });
+      if (myEvents === undefined) {
+        setMyEvents([]);
+        if (viewUserProfile.BID !== undefined)
+          viewUserProfile.EID.forEach((element) => {
+            //console.log(element)
+            const eventCollectionRef = doc(db, "Events", element);
+            const getEvent = async () => {
+              const data = await getDoc(eventCollectionRef);
+              const temp = data.data();
+              //console.log(data.data());
+              temp.eid = element;
+              setMyEvents((arr) => [...arr, temp]);
+              console.log(myEvents);
+            };
+            getEvent();
+          });
+      }
 
       //saved blogs
-      user.SavedBID.forEach((element) => {
-        const blogCollectionRef = doc(db, "Blogs", element);
-        const getBlog = async () => {
-        const data = await getDoc(blogCollectionRef);
-        const temp = data.data();
-        //console.log(temp)
-        temp.bid = element;
-        setSavedBlogs((arr) => [...arr, temp]);
-        };
-        getBlog(); 
-      });
-
-      //wishlist
-      user.WishPID.forEach((element) => {
-        const productCollectionRef = doc(db, "Products", element);
-        const getProduct = async () => {
-        const data = await getDoc(productCollectionRef);
-        const temp = data.data();
-        //console.log(temp)
-        temp.pid = element;
-        setWishList((arr) => [...arr, temp]);
-        };
-        getProduct(); 
-      });
+      if (savedBlogs === undefined) {
+        setSavedBlogs([]);
+        if (viewUserProfile.SavedBID !== undefined)
+          viewUserProfile.SavedBID.forEach((element) => {
+            const blogCollectionRef = doc(db, "Blogs", element);
+            const getBlog = async () => {
+              const data = await getDoc(blogCollectionRef);
+              const temp = data.data();
+              //console.log(temp)
+              temp.bid = element;
+              setSavedBlogs((arr) => [...arr, temp]);
+            };
+            getBlog();
+          });
+      }
 
       //saved events
-      // user.SavedEID.forEach((element) => {
-      //   const eventCollectionRef = doc(db, "Events", element);
-      //   const getEvent = async () => {
-      //   const data = await getDoc(eventCollectionRef);
-      //   const temp = data.data();
-      //   //console.log(temp)
-      //   temp.eid = element.product;
-      //   setSavedEvents((arr) => [...arr, temp]);
-      //   };
-      //   getEvent(); 
-      // });
+      if (savedEvents === undefined) {
+        setSavedEvents([]);
+        if (viewUserProfile.SavedEID !== undefined)
+          viewUserProfile.SavedEID.forEach((element) => {
+            const eventCollectionRef = doc(db, "Events", element);
+            const getEvent = async () => {
+              const data = await getDoc(eventCollectionRef);
+              const temp = data.data();
+              //console.log(temp)
+              temp.eid = element.product;
+              setSavedEvents((arr) => [...arr, temp]);
+            };
+            getEvent();
+          });
+      }
+    };
+    if (user !== undefined && viewUserProfile !== undefined) {
+      getData();
     }
-
-  },[!user])
-
+  }, [viewUserProfile]);
 
   return (
     <>
-    
-   {
-    user !== undefined ? (
-      <div className="gradient-custom-2" style={{ backgroundColor: '#9de2ff' }}>
-      <MDBContainer className="py-5 h-100">
-        <MDBRow className="justify-content-center align-items-center h-100">
-          <MDBCol lg="9" xl="7">
-            <MDBCard>
-              <div className="rounded-top text-white d-flex flex-row" style={{ backgroundColor: '#000', height: '200px' }}>
-                <div className="ms-4 mt-5 d-flex flex-column" style={{ width: '150px' }}>
-                  <MDBCardImage src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-1.webp"
-                    alt="Generic placeholder image" className="mt-4 mb-2 img-thumbnail" fluid style={{ width: '150px', zIndex: '1' }} />
-                  <MDBBtn outline color="dark" style={{height: '36px', overflow: 'visible'}}>
-                    Edit profile
-                  </MDBBtn>
-                </div>
-                <div className="ms-3" style={{ marginTop: '130px' }}>
-                  <MDBTypography tag="h5">{user.name}</MDBTypography>
-                  <MDBCardText>Place</MDBCardText>
-                </div>
-              </div>
-              <div className="p-4 text-black" style={{ backgroundColor: '#f8f9fa' }}>
-                <div className="d-flex justify-content-end text-center py-1">
-                  <div>
-                    <MDBCardText className="mb-1 h5">253</MDBCardText>
-                    <MDBCardText className="small text-muted mb-0">Photos</MDBCardText>
+      {viewUserProfile !== undefined ? (
+        <div
+          className="gradient-custom-2"
+          style={{ backgroundColor: "#9de2ff" }}
+        >
+          <MDBContainer className="py-5 h-100">
+            <MDBRow className="justify-content-center align-items-center h-100">
+              <MDBCol lg="9" xl="7">
+                <MDBCard>
+                  <div
+                    className="rounded-top text-white d-flex flex-row"
+                    style={{ backgroundColor: "#000", height: "200px" }}
+                  >
+                    <div
+                      className="ms-4 mt-5 d-flex flex-column"
+                      style={{ width: "150px" }}
+                    >
+                      <MDBCardImage
+                        src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-1.webp"
+                        alt="Generic placeholder image"
+                        className="mt-4 mb-2 img-thumbnail"
+                        fluid
+                        style={{ width: "150px", zIndex: "1" }}
+                      />
+                      <MDBBtn
+                        outline
+                        color="dark"
+                        style={{ height: "36px", overflow: "visible" }}
+                      >
+                        Edit profile
+                      </MDBBtn>
+                    </div>
+                    <div className="ms-3" style={{ marginTop: "130px" }}>
+                      <MDBTypography tag="h5">
+                        {viewUserProfile.name}
+                      </MDBTypography>
+                      <MDBCardText>Place</MDBCardText>
+                    </div>
                   </div>
-                  <div className="px-3">
-                    <MDBCardText className="mb-1 h5">1026</MDBCardText>
-                    <MDBCardText className="small text-muted mb-0">Followers</MDBCardText>
+                  <div
+                    className="p-4 text-black"
+                    style={{ backgroundColor: "#f8f9fa" }}
+                  >
+                    <div className="d-flex justify-content-end text-center py-1">
+                      <div>
+                        <MDBCardText className="mb-1 h5">253</MDBCardText>
+                        <MDBCardText className="small text-muted mb-0">
+                          Photos
+                        </MDBCardText>
+                      </div>
+                      <div className="px-3">
+                        <MDBCardText className="mb-1 h5">1026</MDBCardText>
+                        <MDBCardText className="small text-muted mb-0">
+                          Followers
+                        </MDBCardText>
+                      </div>
+                      <div>
+                        <MDBCardText className="mb-1 h5">478</MDBCardText>
+                        <MDBCardText className="small text-muted mb-0">
+                          Following
+                        </MDBCardText>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <MDBCardText className="mb-1 h5">478</MDBCardText>
-                    <MDBCardText className="small text-muted mb-0">Following</MDBCardText>
-                  </div>
-                </div>
-              </div>
-              <MDBCardBody className="text-black p-4">
-                <div className="mb-5">
-                  <p className="lead fw-normal mb-1">About</p>
-                  <div className="p-4" style={{ backgroundColor: '#f8f9fa' }}>
-                    <MDBCardText className="font-italic mb-1">{user.description}</MDBCardText>
-                    {/* <MDBCardText className="font-italic mb-1">Lives in New York</MDBCardText>
+                  <MDBCardBody className="text-black p-4">
+                    <div className="mb-5">
+                      <p className="lead fw-normal mb-1">About</p>
+                      <div
+                        className="p-4"
+                        style={{ backgroundColor: "#f8f9fa" }}
+                      >
+                        <MDBCardText className="font-italic mb-1">
+                          {viewUserProfile.description}
+                        </MDBCardText>
+                        {/* <MDBCardText className="font-italic mb-1">Lives in New York</MDBCardText>
                     <MDBCardText className="font-italic mb-0">Photographer</MDBCardText> */}
-                  </div>
-                </div>
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                  <MDBCardText className="lead fw-normal mb-0">Recent Blogs</MDBCardText>
-                  <MDBCardText className="mb-0"><a href="#!" className="text-muted">Show all</a></MDBCardText>
-                </div>
-                <MDBRow>
-                  <MDBCol className="mb-2">
-                    <MDBCardImage src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(112).webp"
-                      alt="image 1" className="w-100 rounded-3" />
+                      </div>
+                    </div>
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                      <MDBCardText className="lead fw-normal mb-0">
+                        Recent Blogs
+                      </MDBCardText>
+                      <MDBCardText className="mb-0">
+                        <a href="#!" className="text-muted">
+                          Show all
+                        </a>
+                      </MDBCardText>
+                    </div>
+                    <MDBRow>
+                      <MDBCol className="mb-2">
+                        <MDBCardImage
+                          src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(112).webp"
+                          alt="image 1"
+                          className="w-100 rounded-3"
+                        />
+                      </MDBCol>
+                      <MDBCol className="mb-2">
+                        <MDBCardImage
+                          src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(107).webp"
+                          alt="image 1"
+                          className="w-100 rounded-3"
+                        />
+                      </MDBCol>
+                    </MDBRow>
+                    <MDBRow className="g-2">
+                      <MDBCol className="mb-2">
+                        <MDBCardImage
+                          src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(108).webp"
+                          alt="image 1"
+                          className="w-100 rounded-3"
+                        />
+                      </MDBCol>
+                      <MDBCol className="mb-2">
+                        <MDBCardImage
+                          src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(114).webp"
+                          alt="image 1"
+                          className="w-100 rounded-3"
+                        />
+                      </MDBCol>
+                    </MDBRow>
+                  </MDBCardBody>
+                </MDBCard>
+              </MDBCol>
+            </MDBRow>
+          </MDBContainer>
+
+          {myProducts !== undefined && myProducts.length !== 0 ? (
+            <MDBContainer fluid className="my-5 text-center">
+              <h4 className="mt-4 mb-5">
+                {id === user.uid ? (
+                  <strong> My Products</strong>
+                ) : (
+                  <strong> {viewUserProfile.name}s' Products</strong>
+                )}
+              </h4>
+
+              <MDBRow>
+                {myProducts.map((product) => (
+                  <MDBCol md="12" lg="4" className="mb-4" key={product.pid}>
+                    <MDBCard>
+                      <MDBRipple
+                        rippleColor="light"
+                        rippleTag="div"
+                        className="bg-image rounded hover-zoom"
+                      >
+                        <MDBCardImage
+                          src={product.image}
+                          fluid
+                          className="w-100"
+                        />
+                        <Link to={`/viewProduct/${product.pid}`}>
+                          <div className="mask">
+                            <div className="d-flex justify-content-start align-items-end h-100">
+                              <h5>
+                                <span className="badge bg-primary ms-2">
+                                  New
+                                </span>
+                              </h5>
+                            </div>
+                          </div>
+                          <div className="hover-overlay">
+                            <div
+                              className="mask"
+                              style={{
+                                backgroundColor: "rgba(251, 251, 251, 0.15)",
+                              }}
+                            ></div>
+                          </div>
+                        </Link>
+                      </MDBRipple>
+                      <MDBCardBody>
+                        <Link
+                          to={`/viewProduct/${product.pid}`}
+                          className="text-reset"
+                        >
+                          <h5 className="card-title mb-3">{product.title}</h5>
+                        </Link>
+                        <Link
+                          to={`/viewProduct/${product.pid}`}
+                          className="text-reset"
+                        >
+                          <p>Category</p>
+                        </Link>
+                        <h6 className="mb-3">${product.price}</h6>
+                      </MDBCardBody>
+                    </MDBCard>
                   </MDBCol>
-                  <MDBCol className="mb-2">
-                    <MDBCardImage src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(107).webp"
-                      alt="image 1" className="w-100 rounded-3" />
+                ))}
+              </MDBRow>
+            </MDBContainer>
+          ) : (
+            <></>
+          )}
+
+          {wishList !== undefined ? (
+            <MDBContainer fluid className="my-5 text-center">
+              <h4 className="mt-4 mb-5">
+                {id === user.uid ? <strong> My Wishlist</strong> : <></>}
+              </h4>
+
+              <MDBRow>
+                {wishList.map((product) => (
+                  <MDBCol md="12" lg="4" className="mb-4" key={product.pid}>
+                    <MDBCard>
+                      <MDBRipple
+                        rippleColor="light"
+                        rippleTag="div"
+                        className="bg-image rounded hover-zoom"
+                      >
+                        <MDBCardImage
+                          src={product.image}
+                          fluid
+                          className="w-100"
+                        />
+                        <Link to={`/viewProduct/${product.pid}`}>
+                          <div className="mask">
+                            <div className="d-flex justify-content-start align-items-end h-100">
+                              <h5>
+                                <span className="badge bg-primary ms-2">
+                                  New
+                                </span>
+                              </h5>
+                            </div>
+                          </div>
+                          <div className="hover-overlay">
+                            <div
+                              className="mask"
+                              style={{
+                                backgroundColor: "rgba(251, 251, 251, 0.15)",
+                              }}
+                            ></div>
+                          </div>
+                        </Link>
+                      </MDBRipple>
+                      <MDBCardBody>
+                        <Link
+                          to={`/viewProduct/${product.pid}`}
+                          className="text-reset"
+                        >
+                          <h5 className="card-title mb-3">{product.title}</h5>
+                        </Link>
+                        <Link
+                          to={`/viewProduct/${product.pid}`}
+                          className="text-reset"
+                        >
+                          <p>Category</p>
+                        </Link>
+                        <h6 className="mb-3">${product.price}</h6>
+                      </MDBCardBody>
+                    </MDBCard>
                   </MDBCol>
-                </MDBRow>
-                <MDBRow className="g-2">
-                  <MDBCol className="mb-2">
-                    <MDBCardImage src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(108).webp"
-                      alt="image 1" className="w-100 rounded-3" />
-                  </MDBCol>
-                  <MDBCol className="mb-2">
-                    <MDBCardImage src="https://mdbcdn.b-cdn.net/img/Photos/Lightbox/Original/img%20(114).webp"
-                      alt="image 1" className="w-100 rounded-3" />
-                  </MDBCol>
-                </MDBRow>
-              </MDBCardBody>
-            </MDBCard>
-          </MDBCol>
-        </MDBRow>
-      </MDBContainer>
-      
-    </div>
-    ) : (
-      <Spinner/>
-    )
-   }
-    
- 
+                ))}
+              </MDBRow>
+            </MDBContainer>
+          ) : (
+            <></>
+          )}
+        </div>
+      ) : (
+        <Spinner />
+      )}
     </>
   );
 }

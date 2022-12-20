@@ -151,7 +151,7 @@ export default function LoginSignup() {
         console.log(newUser)
         
        // console.log(user)
-        navigate('/userProfile')
+        navigate(`/userProfile/${userr.uid}`)
        }
 
        setUserName()
