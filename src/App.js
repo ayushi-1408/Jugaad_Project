@@ -30,6 +30,7 @@ import ProductContext from "./Contexts/ProductsContext";
 import BlogsContext from "./Contexts/BlogsContext";
 import EventsContext from "./Contexts/EventsContext";
 import OrderContext from "./Contexts/OrderContext";
+import ViewFullBlog from "./Components/ViewFullBlog";
 
 function App() {
   const [user, setUser] = useState();
@@ -62,7 +63,7 @@ function App() {
               <Route path="addProduct" element={<AddProduct />} />
               <Route path="newUser" element={<NewUser />} />
               <Route path="userProfile" element={<UserProfile />} />
-              <Route path="viewBlog/:id" element={<ViewFullProduct />} />
+              <Route path="viewBlog/:id" element={<ViewFullBlog />} />
               <Route path="viewProduct/:id" element={<ViewFullProduct />} />
 
               <Route path="cart" element={<Cart />} />

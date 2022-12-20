@@ -61,12 +61,12 @@ function Cart() {
         updateDoc(userRef, {
           Cart: arrayUnion({product:cart[name].pid, quantity:value})
        });
-      }
-      updateCart();
-      setCart(cart.map((product) => 
+       setCart(cart.map((product) => 
         product.pid===cart[name].pid? {...product,quantity:value} : {...product}
       )
       );
+      }
+      updateCart();
   }
 
   const handleRemove = (e) => {
@@ -79,11 +79,11 @@ function Cart() {
       updateDoc(userRef, {
          Cart: arrayRemove({product:cart[name].pid, quantity:cart[name].quantity})
       });
+      setCart((products) => (
+        products.filter((product) => product.pid !== cart[name].pid)
+      ));
     }
     updateCart();
-    setCart((products) => (
-      products.filter((product) => product.pid !== cart[name].pid)
-    ));
   }
     
 
@@ -107,7 +107,7 @@ function Cart() {
         getProduct(); 
       });
     };
-    getCart();
+    if(user !== undefined) getCart();
   }, [!user]);
 
   return (
@@ -128,7 +128,7 @@ function Cart() {
                 </MDBCardHeader>
                 <MDBCardBody>
                   {cart.map((product) => (
-                      <><MDBRow>
+                      <><MDBRow key={product.pid}>
                       <MDBCol lg="3" md="12" className="mb-4 mb-lg-0">
                         <MDBRipple rippleTag="div" rippleColor="light"
                           className="bg-image rounded hover-zoom hover-overlay">

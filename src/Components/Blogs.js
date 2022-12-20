@@ -32,7 +32,7 @@ export default function Blogs() {
     if(blogs===undefined) {
       const getblogs = async () => {
         const data = await getDocs(blogCollectionRef)
-        console.log(data)
+        //console.log(data)
         setBlogs(data.docs.map((doc) => ({...doc.data(), id:doc.id })))
      }
  
@@ -62,14 +62,14 @@ export default function Blogs() {
       blogs !== undefined ? (
         <MDBRow className='row-cols-1 row-cols-md-3 g-4'>
         {blogs.map((blog) => (
-          <MDBCol>
+          <MDBCol key={blog.id}>
           <MDBCard className='h-100'>
+          <Link to={`/viewBlog/${blog.id}`}>
             <MDBCardImage
               src={blog.image}
               alt='...'
               position='top'
             />
-
             <MDBCardBody>
               <MDBCardTitle>{blog.title}</MDBCardTitle>
               <MDBCardText>
@@ -79,6 +79,7 @@ export default function Blogs() {
             <MDBCardFooter>
               <small className='text-muted'>Last updated 3 mins ago</small>
             </MDBCardFooter>
+            </Link>
           </MDBCard>
         </MDBCol>
         ))}

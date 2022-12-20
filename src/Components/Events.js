@@ -22,7 +22,7 @@ export default function Events() {
     if(events===undefined) {
       const getEvents = async () => {
         const data = await getDocs(eventCollectionRef)
-        console.log(data)
+        ///console.log(data)
         setEvents(data.docs.map((doc) => ({...doc.data(), id:doc.id })))
      }
  
@@ -52,7 +52,7 @@ export default function Events() {
         <div >
     <Row xs={1} md={2} className="g-4">
       {events.map(product => (
-        <Col>
+        <Col key={product.id}>
           <Link to={`/viewProduct/${product.id}`}
            style={{textDecoration: 'none',color:'black'}}>
           <Card key={product.id} >           

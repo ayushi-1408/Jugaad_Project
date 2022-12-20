@@ -31,6 +31,10 @@ export default function LoginSignup() {
     BID:[],
     Cart:[],
     PID:[],
+    EID:[],
+    WishPID:[],
+    SavedBID:[],
+    SavedEID:[],
     additionalInfo:{}
   })
 

@@ -12,6 +12,7 @@ import {
   doc,
   updateDoc,
   arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 import UserContext from "../Contexts/UserContext";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -26,7 +27,8 @@ function ViewFullProduct(props) {
   const { user, setUser } = useContext(UserContext);
   const auth = getAuth();
 
-  const [addToCart, setState ] = useState(true);
+  const [addToCart, setStateCart ] = useState(true);
+  const [addToWishList, setStateWishList ] = useState(true);
 
   const productCollectionRef = doc(db, "Products", id);
 
@@ -52,7 +54,8 @@ function ViewFullProduct(props) {
     const getProduct = async () => {
       console.log(user.Cart)
       const data = await getDoc(productCollectionRef);
-      user.Cart.forEach((product) => id === product.product ? setState(false) : console.log(product.product))
+      if(user.Cart !== undefined && user.Cart.length > 0 ) user.Cart.forEach((product) => id === product.product ? setStateCart(false) : console.log())
+      if(user.WishPID !== undefined && user.WishPID.length > 0 ) user.WishPID.forEach((product) => id === product ? setStateWishList(false) : console.log())
       setProduct(data.data());
     };
 
@@ -67,10 +70,38 @@ function ViewFullProduct(props) {
       await updateDoc(userRef, {
         Cart: arrayUnion({product:id, quantity:1}),
       });
-      setState(false);
+      setStateCart(false);
     };
 
     addToCart();
+  };
+
+  const addWishList = () => {
+    
+    const userRef = doc(db, "Users", user.uid);
+    const addToWishList = async () => {
+      //console.log(user)
+      await updateDoc(userRef, {
+        WishPID: arrayUnion(id),
+      });
+      setStateWishList(false);
+    };
+
+    addToWishList();
+  };
+
+  const removeWishList = () => {
+    
+    const userRef = doc(db, "Users", user.uid);
+    const remWishList = async () => {
+      //console.log(user)
+      await updateDoc(userRef, {
+        WishPID: arrayRemove(id),
+      });
+      setStateWishList(true);
+    };
+
+    remWishList();
   };
 
   return (
@@ -101,8 +132,19 @@ function ViewFullProduct(props) {
             Add to Cart
           </Button>
             ) : (
-              <Button variant="light " disabled type="submit" onClick={handleCart}>
+              <Button variant="light " disabled type="submit" >
             Added to Cart
+          </Button>
+            )
+          }
+          {
+            addToWishList === true ? (
+              <Button variant="light" type="submit" onClick={addWishList}>
+            Add to WishList
+          </Button>
+            ) : (
+              <Button variant="dark " type="submit" onClick={removeWishList}>
+            Remove from WishList
           </Button>
             )
           }

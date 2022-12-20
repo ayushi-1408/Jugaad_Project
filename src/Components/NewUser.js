@@ -36,6 +36,10 @@ function NewUser() {
       BID:[],
       Cart:[],
       PID:[],
+      EID:[],
+      WishPID:[],
+      SavedBID:[],
+      SavedEID:[],
       additionalInfo:{}
     })
 
