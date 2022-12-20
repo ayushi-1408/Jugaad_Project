@@ -11,7 +11,17 @@ import ProductContext from '../Contexts/ProductsContext';
 
 
 function AddProduct() {
-    const [newProduct,setNewProduct] = useState({price:0})
+    const [newProduct,setNewProduct] = useState({
+      price:0,
+      title:"",
+      dateOfPosting:new Date(),
+      description:"",
+      MediaID:[],
+      CommentID:[],
+      categories:[],
+      BID:[],
+      deliverySpan:1
+    })
     const productCollectionRef = collection(db , "Products" )
 
     const {user,setUser}= useContext(UserContext)

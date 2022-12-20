@@ -20,7 +20,16 @@ import BlogsContext from '../Contexts/BlogsContext';
 
 
 function AddBlog() {
-    const [newBlog,setNewBlog] = useState({})
+    const [newBlog,setNewBlog] = useState({
+      title:"",
+      dateOfPosting:new Date(),
+      description:"",
+      MediaID:[],
+      LIkeUID:[],
+      CommentID:[],
+      categories:[],
+      PID:[]
+    })
     const BlogCollectionRef = collection(db , "Blogs" )
 
     const {user,setUser}= useContext(UserContext)

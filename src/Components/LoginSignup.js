@@ -17,6 +17,7 @@ export default function LoginSignup() {
     name:"",
     password:"",
     description:"",
+    dateOfPosting:new Date(),
     address:"",
     connections: {
       connected:[],

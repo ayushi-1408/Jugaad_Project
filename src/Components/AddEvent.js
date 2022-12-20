@@ -11,7 +11,15 @@ import EventsContext from '../Contexts/EventsContext';
 
 
 function AddEvent() {
-    const [newEvent,setNewEvent] = useState([])
+    const [newEvent,setNewEvent] = useState({
+      title:"",
+      dateOfPosting:new Date(),
+      dateOfEvent:new Date(),
+      description:"",
+      address:"",
+      city:"",
+      categories:[],
+    })
     const eventCollectionRef = collection(db , "Events" )
 
     const {user,setUser}= useContext(UserContext)

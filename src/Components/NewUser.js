@@ -22,6 +22,7 @@ function NewUser() {
       name:"",
       password:"",
       description:"",
+      dateOfPosting:new Date(),
       address:"",
       connections: {
         connected:[],
