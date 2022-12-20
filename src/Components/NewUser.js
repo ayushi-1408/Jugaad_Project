@@ -18,16 +18,34 @@ import {
 from 'mdb-react-ui-kit';
 
 function NewUser() {
-    const [newUser,setNewUser] = useState([])
+    const [newUser,setNewUser] = useState({
+      name:"",
+      password:"",
+      description:"",
+      dateOfPosting:new Date(),
+      address:"",
+      connections: {
+        connected:[],
+        requestsReceived:[],
+        requestsSent:[]
+      },
+      dob:"",
+      email:"",
+      mobile:null,
+      OID:[],
+      BID:[],
+      Cart:[],
+      PID:[],
+      additionalInfo:{}
+    })
 
     const navigate=useNavigate()
 
     const handleInput = (e) => {
-        const name=e.target.placeholder;
+        const name=e.target.name;
         const value=e.target.value;
 
         setNewUser({...newUser, [name]:value})
-        //console.log(newProduct)
     }
 
     const handleSubmit = (e) => {
@@ -118,10 +136,13 @@ createUserWithEmailAndPassword(auth, newUser.email, newUser.password)
       <MDBCard className='m-5' style={{maxWidth: '600px'}}>
         <MDBCardBody className='px-5'>
           <h2 className="text-uppercase text-center mb-5">Create an account</h2>
-          <MDBInput wrapperClass='mb-4' label='Your Name' size='lg' id='form1' type='text'/>
-          <MDBInput wrapperClass='mb-4' label='Your Email' size='lg' id='form2' type='email'/>
-          <MDBInput wrapperClass='mb-4' label='Password' size='lg' id='form3' type='password'/>
-          <MDBInput wrapperClass='mb-4' label='Repeat your password' size='lg' id='form4' type='password'/>
+          <MDBInput wrapperClass='mb-4' label='Your Name' size='lg' id='form1' type='text' name="name" onChange={handleInput} value={newUser.name}/>
+          <MDBInput wrapperClass='mb-4' label='Your Email' size='lg' id='form2' type='email' name="email" onChange={handleInput} value={newUser.email}/>
+          <MDBInput wrapperClass='mb-4' label='Password' size='lg' id='form3' type='password' name="password" onChange={handleInput} value={newUser.password}/>
+          <MDBInput wrapperClass='mb-4' label='Mobile No.' size='lg' id='form4' type='phone' name="mobile" onChange={handleInput} value={newUser.mobile}/>
+          <MDBInput wrapperClass='mb-4' label='Dob' size='lg' id='form5' type='date' name="dob" onChange={handleInput} value={newUser.dob}/>
+          <MDBInput wrapperClass='mb-4' label='Address' size='lg' id='form6' type='text' name="address" onChange={handleInput} value={newUser.address}/>
+          <MDBInput wrapperClass='mb-4' label='Description' size='lg' id='form7' type='textarea' name="description" onChange={handleInput} value={newUser.description}/>
           <div className='d-flex flex-row justify-content-center mb-4'>
             <MDBCheckbox name='flexCheck' id='flexCheckDefault' label='I agree all statements in Terms of service' />
           </div>

@@ -7,65 +7,38 @@ import { Navigate, useNavigate } from "react-router-dom";
 import UserContext from "../Contexts/UserContext";
 import { db } from "../firebase-config";
 import { MDBCol, MDBContainer, MDBRow, MDBCard, MDBCardText, MDBCardBody, MDBCardImage, MDBBtn, MDBTypography } from 'mdb-react-ui-kit';
-
+import Spinner from "./Spinner";
 export default function UserProfile() {
-  // const { user, setUser } = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
 
-  // const [userData, setUserData] = useState({});
 
-  // const auth = getAuth();
+  const auth = getAuth();
 
-  // const nav=useNavigate()
+  const nav=useNavigate()
 
-  // if (!user) {
-  //   onAuthStateChanged(auth, (userr) => {
-  //     if (userr) {
-  //       console.log(userr);
-  //       setUser(userr.uid);
-  //     } else {
-  //       nav('/login')
-  //     }
-  //   });
-  // }
-
-  // useEffect(() => {
-  //   const getUser = async () => {
-  //     const userRef = doc(db, "Users", user);
-  //     const data = await getDoc(userRef);
-  //     console.log(data.data());
-  //     setUserData(data.data());
-  //   };
-  //   getUser();
-  // }, [!user]);
+  if (user==undefined || user.uid == undefined) {
+    onAuthStateChanged(auth, (userr) => {
+      if (userr) {
+       // console.log(userr);
+        const getUser = async () => {
+          const userRef = doc(db, "Users", userr.uid);
+          const data = await getDoc(userRef);
+          setUser({...data.data(),uid:userr.uid})
+        };
+        getUser();
+      } else {
+        nav('/login')
+      }
+    });
+  }
 
 
   return (
     <>
-    {/* <div>
-      <Card>
-        <Card.Body>
-          <Card.Text>{userData.name}</Card.Text>
-        </Card.Body>
-        <Card.Body>
-          <Card.Text>{userData.mobile}</Card.Text>
-        </Card.Body>
-        <Card.Body>
-          <Card.Text>{userData.email}</Card.Text>
-        </Card.Body>
-        <Card.Body>
-          <Card.Text>{userData.address}</Card.Text>
-        </Card.Body>
-        <Card.Body>
-          <Card.Text>{userData.dob}</Card.Text>
-        </Card.Body>
-        <Card.Body>
-          <Card.Text>{userData.description}</Card.Text>
-        </Card.Body>
-      </Card>
-    </div> */}
     
-
-    <div className="gradient-custom-2" style={{ backgroundColor: '#9de2ff' }}>
+   {
+    user !== undefined ? (
+      <div className="gradient-custom-2" style={{ backgroundColor: '#9de2ff' }}>
       <MDBContainer className="py-5 h-100">
         <MDBRow className="justify-content-center align-items-center h-100">
           <MDBCol lg="9" xl="7">
@@ -79,7 +52,7 @@ export default function UserProfile() {
                   </MDBBtn>
                 </div>
                 <div className="ms-3" style={{ marginTop: '130px' }}>
-                  <MDBTypography tag="h5">Name</MDBTypography>
+                  <MDBTypography tag="h5">{user.name}</MDBTypography>
                   <MDBCardText>Place</MDBCardText>
                 </div>
               </div>
@@ -103,9 +76,9 @@ export default function UserProfile() {
                 <div className="mb-5">
                   <p className="lead fw-normal mb-1">About</p>
                   <div className="p-4" style={{ backgroundColor: '#f8f9fa' }}>
-                    <MDBCardText className="font-italic mb-1">Web Developer</MDBCardText>
-                    <MDBCardText className="font-italic mb-1">Lives in New York</MDBCardText>
-                    <MDBCardText className="font-italic mb-0">Photographer</MDBCardText>
+                    <MDBCardText className="font-italic mb-1">{user.description}</MDBCardText>
+                    {/* <MDBCardText className="font-italic mb-1">Lives in New York</MDBCardText>
+                    <MDBCardText className="font-italic mb-0">Photographer</MDBCardText> */}
                   </div>
                 </div>
                 <div className="d-flex justify-content-between align-items-center mb-4">
@@ -138,6 +111,11 @@ export default function UserProfile() {
         </MDBRow>
       </MDBContainer>
     </div>
+    ) : (
+      <Spinner/>
+    )
+   }
+    
  
     </>
   );

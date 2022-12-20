@@ -19,7 +19,7 @@ function ViewFullBlog(props) {
   const param = useParams();
   const { id } = param;
   console.log(id);
-  const [blog, setblog] = useState([]);
+  const [blog, setblog] = useState();
 
   const { user, setUser } = useContext(UserContext);
   const auth = getAuth();
@@ -28,19 +28,23 @@ function ViewFullBlog(props) {
 
   const nav=useNavigate()
 
-    if(!user) {
-      onAuthStateChanged(auth, (userr) => {
-        if (userr) {
-          console.log(userr)
-          setUser(userr.uid)
-        } else {
-          console.log("not signed")
-          nav('/login')
-        }
-      });
-    }
+  if (user==undefined || user.uid == undefined) {
+    onAuthStateChanged(auth, (userr) => {
+      if (userr) {
+       // console.log(userr);
+        const getUser = async () => {
+          const userRef = doc(db, "Users", userr.uid);
+          const data = await getDoc(userRef);
+          setUser({...data.data(),uid:userr.uid})
+        };
+        getUser();
+      } else {
+        nav('/login')
+      }
+    });
+  }
 
-  console.log(user);
+
 
   useEffect(() => {
     const getblog = async () => {
@@ -67,7 +71,10 @@ function ViewFullBlog(props) {
   };
 
   return (
-    <div>
+    <>
+    {
+      blog !== undefined ? (
+        <div>
       <Card>
         <p style={{ alignContent: "center" }}>
           <Card.Img
@@ -90,6 +97,12 @@ function ViewFullBlog(props) {
         </Button>
       </Card>
     </div>
+      ) : (
+        <Spinner/>
+      )
+    }
+    </>
+    
   );
 }
 

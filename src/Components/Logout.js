@@ -1,9 +1,11 @@
 import { getAuth, signOut } from "firebase/auth";
 import React from "react";
+import { useContext } from "react";
 import { useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
+import UserContext from "../Contexts/UserContext";
 
-function Logout() {
+const Logout = () => {
   const auth = getAuth();
   signOut(auth)
     .then(() => {
