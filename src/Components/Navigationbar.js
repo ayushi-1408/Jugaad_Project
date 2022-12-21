@@ -79,7 +79,8 @@ function Navigationbar() {
                   <Link
                     id="userName"
                    to ={`/userProfile/${user.uid}/`}
-                   reloadDocument="true"
+                  // onClick={() => nav(`/userProfile/${user.uid}`)}
+                  // reloadDocument="true"
                     style={{ textDecoration: "none", color: "white" }}
                   >
                     {user.name}

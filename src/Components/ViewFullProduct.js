@@ -30,8 +30,6 @@ function ViewFullProduct(props) {
   const [addToCart, setStateCart ] = useState(true);
   const [addToWishList, setStateWishList ] = useState(true);
 
-  const productCollectionRef = doc(db, "Products", id);
-
   const nav=useNavigate()
 
   if (user==undefined || user.uid == undefined) {
@@ -53,6 +51,7 @@ function ViewFullProduct(props) {
   useEffect(() => {
     const getProduct = async () => {
       //console.log(user.Cart)
+      const productCollectionRef = doc(db, "Products", id);
       const data = await getDoc(productCollectionRef);
       if(user.Cart !== undefined && user.Cart.length > 0 ) user.Cart.forEach((product) => id === product.product ? setStateCart(false) : console.log())
       if(user.WishPID !== undefined && user.WishPID.length > 0 ) user.WishPID.forEach((product) => id === product ? setStateWishList(false) : console.log())
@@ -60,8 +59,8 @@ function ViewFullProduct(props) {
       
     };
 
-    getProduct();
-  }, [!user]);
+    if(user !== undefined) getProduct();
+  }, [id,user]);
 
   const handleCart = () => {
     
@@ -148,7 +147,7 @@ function ViewFullProduct(props) {
           </Button>
             )
           }
-          <Link to={`/userProfile/${product.UID}/`} reloadDocument="true">
+          <Link to={`/userProfile/${product.UID}/`} >
           <Button variant="primary " type="submit" >
             View this user profile
           </Button>

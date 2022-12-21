@@ -78,7 +78,7 @@ export default function Products() {
                     className="bg-image rounded hover-zoom"
                   >
                     <MDBCardImage src={product.image} fluid className="w-100" />
-                    <Link to={`/viewProduct/${product.id}`} reloadDocument="true">
+                    <Link to={`/viewProduct/${product.id}`} >
                       <div className="mask">
                         <div className="d-flex justify-content-start align-items-end h-100">
                           <h5>
@@ -100,14 +100,14 @@ export default function Products() {
                     <Link
                       to={`/viewProduct/${product.id}`}
                       className="text-reset"
-                      reloadDocument="true"
+                      
                     >
                       <h5 className="card-title mb-3">{product.title}</h5>
                     </Link>
                     <Link
                       to={`/viewProduct/${product.id}`}
                       className="text-reset"
-                      reloadDocument="true"
+                      
                     >
                       <p>Category</p>
                     </Link>

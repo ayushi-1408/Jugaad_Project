@@ -1,8 +1,8 @@
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { arrayRemove, arrayUnion, doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { useContext } from "react";
-import { Card } from "react-bootstrap";
+import { Button, Card } from "react-bootstrap";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import UserContext from "../Contexts/UserContext";
 import { db } from "../firebase-config";
@@ -40,6 +40,8 @@ export default function UserProfile(props) {
   const [wishList, setWishList] = useState();
   const [savedEvents, setSavedEvents] = useState();
 
+  const [connect, setConnect ] = useState();
+
   const auth = getAuth();
 
   const nav = useNavigate();
@@ -61,148 +63,204 @@ export default function UserProfile(props) {
   }
 
   useEffect(() => {
-    console.log("1");
     const getProfile = async () => {
-      console.log("2");
       if (user.uid === id) {
         setViewUserProfile({ ...user });
+        setConnect("none")
       } else {
         const userRef = doc(db, "Users", id);
         const dataa = await getDoc(userRef);
         setViewUserProfile({ ...dataa.data() });
+        if(user.requestsMade &&  user.requestsMade.includes(id)) setConnect("sent")
+        else if(user.requestsReceived && user.requestsReceived.includes(id)) setConnect("received")
+        else if(user.connected && user.connected.includes(id)) setConnect("connected")
+        else setConnect("connect")
       }
     };
 
     if (user !== undefined) getProfile();
-  }, [user]);
+  }, [id, user]);
 
   useEffect(() => {
+    console.log("enetered in useeffect");
     const getData = async () => {
-      //wishlist
-      
-    };
-
-    if (user !== undefined && viewUserProfile !== undefined) {
-      getData();
-    }
-  }, [viewUserProfile]);
-
-  useEffect(() => {
-    const getData = async () => {
+      console.log("entered in getdata");
       //MyProducts
-      if (myProducts === undefined) {
-        setMyProducts([]);
-        console.log("MYProducts")
-        if (viewUserProfile.PID !== undefined)
-          viewUserProfile.PID.forEach((element) => {
-            console.log("Hey2");
-            const productCollectionRef = doc(db, "Products", element);
-            const getProduct = async () => {
-              const data = await getDoc(productCollectionRef);
-              const temp = data.data();
-              // console.log(temp)
-              temp.pid = element;
-              setMyProducts((arr) => [...arr, temp]);
-              console.log(myProducts);
-            };
-            getProduct();
-          });
-      }
+      // if (myProducts === undefined) {
+      setMyProducts([]);
+      console.log("MYProducts");
+      if (viewUserProfile.PID !== undefined)
+        viewUserProfile.PID.forEach((element) => {
+          console.log("Hey2");
+          const productCollectionRef = doc(db, "Products", element);
+          const getProduct = async () => {
+            const data = await getDoc(productCollectionRef);
+            const temp = data.data();
+            // console.log(temp)
+            temp.pid = element;
+            setMyProducts((arr) => [...arr, temp]);
+            console.log(myProducts);
+          };
+          getProduct();
+        });
+      // }
 
       //WishList
-      if (wishList === undefined) {
-        setWishList([]);
-        console.log("wishlist")
-        if (viewUserProfile.WishPID !== undefined)
-          viewUserProfile.WishPID.forEach((element) => {
-            console.log("hey1")
-            const productCollectionRef = doc(db, "Products", element);
-            const getProduct = async () => {
-              const data = await getDoc(productCollectionRef);
-              const temp = data.data();
-              //console.log(temp)
-              temp.pid = element;
-              setWishList((arr) => [...arr, temp]);
-            };
-            getProduct();
-          });
-      }
+      // if (wishList === undefined) {
+      setWishList([]);
+      console.log("wishlist");
+      if (viewUserProfile.WishPID !== undefined)
+        viewUserProfile.WishPID.forEach((element) => {
+          console.log("hey1");
+          const productCollectionRef = doc(db, "Products", element);
+          const getProduct = async () => {
+            const data = await getDoc(productCollectionRef);
+            const temp = data.data();
+            //console.log(temp)
+            temp.pid = element;
+            setWishList((arr) => [...arr, temp]);
+          };
+          getProduct();
+        });
+      // }
 
       //MyBlogs
-      if (myBlogs === undefined) {
-        setMyBlogs([]);
-        if (viewUserProfile.BID !== undefined)
-          viewUserProfile.BID.forEach((element) => {
-            const blogCollectionRef = doc(db, "Blogs", element);
-            const getBlog = async () => {
-              const data = await getDoc(blogCollectionRef);
-              const temp = data.data();
-              // console.log(temp)
-              temp.bid = element;
-              setMyBlogs((arr) => [...arr, temp]);
-              console.log(myBlogs);
-            };
-            getBlog();
-          });
-      }
+      //if (myBlogs === undefined) {
+      setMyBlogs([]);
+      if (viewUserProfile.BID !== undefined)
+        viewUserProfile.BID.forEach((element) => {
+          const blogCollectionRef = doc(db, "Blogs", element);
+          const getBlog = async () => {
+            const data = await getDoc(blogCollectionRef);
+            const temp = data.data();
+            // console.log(temp)
+            temp.bid = element;
+            setMyBlogs((arr) => [...arr, temp]);
+            console.log(myBlogs);
+          };
+          getBlog();
+        });
+      //}
 
       //MyEvents
-      if (myEvents === undefined) {
-        setMyEvents([]);
-        if (viewUserProfile.BID !== undefined)
-          viewUserProfile.EID.forEach((element) => {
-            //console.log(element)
-            const eventCollectionRef = doc(db, "Events", element);
-            const getEvent = async () => {
-              const data = await getDoc(eventCollectionRef);
-              const temp = data.data();
-              //console.log(data.data());
-              temp.eid = element;
-              setMyEvents((arr) => [...arr, temp]);
-              console.log(myEvents);
-            };
-            getEvent();
-          });
-      }
+      // if (myEvents === undefined) {
+      setMyEvents([]);
+      if (viewUserProfile.BID !== undefined)
+        viewUserProfile.EID.forEach((element) => {
+          //console.log(element)
+          const eventCollectionRef = doc(db, "Events", element);
+          const getEvent = async () => {
+            const data = await getDoc(eventCollectionRef);
+            const temp = data.data();
+            //console.log(data.data());
+            temp.eid = element;
+            setMyEvents((arr) => [...arr, temp]);
+            console.log(myEvents);
+          };
+          getEvent();
+        });
+      //}
 
       //saved blogs
-      if (savedBlogs === undefined) {
-        setSavedBlogs([]);
-        if (viewUserProfile.SavedBID !== undefined)
-          viewUserProfile.SavedBID.forEach((element) => {
-            const blogCollectionRef = doc(db, "Blogs", element);
-            const getBlog = async () => {
-              const data = await getDoc(blogCollectionRef);
-              const temp = data.data();
-              //console.log(temp)
-              temp.bid = element;
-              setSavedBlogs((arr) => [...arr, temp]);
-            };
-            getBlog();
-          });
-      }
+      //if (savedBlogs === undefined) {
+      setSavedBlogs([]);
+      if (viewUserProfile.SavedBID !== undefined)
+        viewUserProfile.SavedBID.forEach((element) => {
+          const blogCollectionRef = doc(db, "Blogs", element);
+          const getBlog = async () => {
+            const data = await getDoc(blogCollectionRef);
+            const temp = data.data();
+            //console.log(temp)
+            temp.bid = element;
+            setSavedBlogs((arr) => [...arr, temp]);
+          };
+          getBlog();
+        });
+      //}
 
       //saved events
-      if (savedEvents === undefined) {
-        setSavedEvents([]);
-        if (viewUserProfile.SavedEID !== undefined)
-          viewUserProfile.SavedEID.forEach((element) => {
-            const eventCollectionRef = doc(db, "Events", element);
-            const getEvent = async () => {
-              const data = await getDoc(eventCollectionRef);
-              const temp = data.data();
-              //console.log(temp)
-              temp.eid = element.product;
-              setSavedEvents((arr) => [...arr, temp]);
-            };
-            getEvent();
-          });
-      }
+      // if (savedEvents === undefined) {
+      setSavedEvents([]);
+      if (viewUserProfile.SavedEID !== undefined)
+        viewUserProfile.SavedEID.forEach((element) => {
+          const eventCollectionRef = doc(db, "Events", element);
+          const getEvent = async () => {
+            const data = await getDoc(eventCollectionRef);
+            const temp = data.data();
+            //console.log(temp)
+            temp.eid = element.product;
+            setSavedEvents((arr) => [...arr, temp]);
+          };
+          getEvent();
+        });
+      //}
     };
     if (user !== undefined && viewUserProfile !== undefined) {
       getData();
     }
   }, [viewUserProfile]);
+
+
+
+  // connection handlers
+
+  const handleAcceptRequest = (e) => {
+    e.preventDefault();
+    const getUser = async () => {
+      updateDoc(doc(db, "Users", user.uid), {
+        requestsReceived: arrayRemove(id),
+        connected: arrayUnion(id),
+      });
+      updateDoc(doc(db, "Users", id), {
+        requestsMade: arrayRemove(user.uid),
+        connected: arrayUnion(user.uid),
+      });
+      setConnect("connected")
+    };
+    getUser();
+  };
+
+  const handleDeleteRequest = (e) => {
+    e.preventDefault();
+    const getUser = async () => {
+      updateDoc(doc(db, "Users", user.uid), {
+        requestsReceived: arrayRemove(id),
+      });
+      updateDoc(doc(db, "Users", id), {
+        requestsMade: arrayRemove(user.uid),
+      });
+      setConnect("connect")
+    };
+    getUser();
+  };
+
+  const handleSendRequest = (e) => {
+    e.preventDefault();
+    const getUser = async () => {
+      updateDoc(doc(db, "Users", user.uid), {
+        requestsMade: arrayUnion(id),
+      });
+      updateDoc(doc(db, "Users", id), {
+        requestsReceived: arrayUnion(user.uid),
+      });
+      setConnect("sent")
+    };
+    getUser();
+  };
+
+  const handleUnsendRequest = (e) => {
+    e.preventDefault();
+    const getUser = async () => {
+      updateDoc(doc(db, "Users", user.uid), {
+        requestsMade: arrayRemove(id),
+      });
+      updateDoc(doc(db, "Users", id), {
+        requestsReceived: arrayRemove(user.uid),
+      });
+      setConnect("connect")
+    };
+    getUser();
+  };
 
   return (
     <>
@@ -338,7 +396,7 @@ export default function UserProfile(props) {
                 {id === user.uid ? (
                   <strong> My Products</strong>
                 ) : (
-                  <strong> {viewUserProfile.name}s' Products</strong>
+                  <strong> {viewUserProfile.name}'s Products</strong>
                 )}
               </h4>
 
@@ -400,10 +458,10 @@ export default function UserProfile(props) {
             <></>
           )}
 
-          {wishList !== undefined ? (
+          { user.uid === id && wishList !== undefined && wishList.length !== 0 ? (
             <MDBContainer fluid className="my-5 text-center">
               <h4 className="mt-4 mb-5">
-                {id === user.uid ? <strong> My Wishlist</strong> : <></>}
+                <strong> My Wishlist</strong> : <></>
               </h4>
 
               <MDBRow>
@@ -460,6 +518,35 @@ export default function UserProfile(props) {
                 ))}
               </MDBRow>
             </MDBContainer>
+          ) : (
+            <></>
+          )}
+
+          {user.uid !== id ? (
+            connect === "sent" ? (
+              <Button variant="light" onClick={handleUnsendRequest}>
+                Unsend Request
+              </Button>
+            ) : connect === "received" ? (
+              <>
+                <Button variant="primary" onClick={handleAcceptRequest}>
+                  AcceptRequest
+                </Button>
+                <Button variant="danger" onClick={handleDeleteRequest}>
+                  Delete Request
+                </Button>
+              </>
+            ) :  connect === "connect" ? ( 
+              <Button variant="primary" onClick={handleSendRequest}>
+                Send Request
+              </Button>
+            ) : connect === "connected" ? (
+              <Button variant="light" disabled >
+                Connected
+              </Button>
+            ) : (
+              <></>
+            )
           ) : (
             <></>
           )}
