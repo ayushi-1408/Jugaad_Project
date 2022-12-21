@@ -24,11 +24,9 @@ function NewUser() {
       description:"",
       dateOfPosting:new Date(),
       address:"",
-      connections: {
-        connected:[],
-        requestsReceived:[],
-        requestsSent:[]
-      },
+      connected:[],
+      requestsReceived:[],
+      requestsMade:[],
       dob:"",
       email:"",
       mobile:null,

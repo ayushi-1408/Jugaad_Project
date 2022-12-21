@@ -59,7 +59,7 @@ function ViewFullBlog(props) {
     };
 
     getblog();
-  }, []);
+  }, [user,id]);
 
   const handleSave = () => {
     const userRef = doc(db, "Users", user.uid);
