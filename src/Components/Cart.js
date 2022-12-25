@@ -3,6 +3,8 @@ import {
   getAuth,
   onAuthStateChanged,
 } from "firebase/auth";
+import { Icon } from 'react-icons-kit'
+import {bin2} from 'react-icons-kit/icomoon/bin2'
 import {
   arrayRemove,
   arrayUnion,
@@ -11,6 +13,7 @@ import {
   getDocs,
   updateDoc,
 } from "firebase/firestore";
+import {heart} from 'react-icons-kit/icomoon/heart'
 import React, { useEffect } from "react";
 import { useState } from "react";
 import { useContext } from "react";
@@ -171,22 +174,22 @@ function Cart() {
                             <p>Size: M</p>
 
                             <MDBBtn
-                              wrapperProps={{ size: "sm" }}
-                              wrapperClass="me-1 mb-2"
+                             
+                              wrapperClass="me-1 m-3"
                               title="Remove item"
                               type="button"
                               onClick={handleRemove}
                               name={cart.indexOf(product)}
                             >
-                              <MDBIcon fas icon="trash" />
+                              <Icon  icon={bin2}/>
                             </MDBBtn>
 
                             <MDBTooltip
-                              wrapperProps={{ size: "sm", color: "danger" }}
-                              wrapperClass="me-1 mb-2"
+                              wrapperProps={{color: "danger" }}
+                              wrapperClass="me-1 m-3"
                               title="Move to the wish list"
                             >
-                              <MDBIcon fas icon="heart" />
+                             <Icon  icon={heart}/>
                             </MDBTooltip>
                           </MDBCol>
                           <MDBCol lg="4" md="6" className="mb-4 mb-lg-0">
