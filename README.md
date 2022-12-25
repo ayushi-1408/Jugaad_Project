@@ -13,6 +13,8 @@ bootstrap
 
 npm i mdb-ui-kit
 
+npm i react-social-icons
+
 
 
 Things to be viewed in User Profile -
