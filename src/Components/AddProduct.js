@@ -35,6 +35,7 @@ import {
   listAll,
   list,
 } from "firebase/storage";
+import { TagsInput } from "react-tag-input-component";
 
 function AddProduct() {
   const [newProduct, setNewProduct] = useState({
@@ -47,8 +48,11 @@ function AddProduct() {
     categories: [],
     BID: [],
     deliverySpan: 1,
+    keywords : []
   });
   const [media, setMedia] = useState([]);
+  const [selected, setSelected] = useState([]);
+
   const productCollectionRef = collection(db, "Products");
 
   const { user, setUser } = useContext(UserContext);
@@ -74,15 +78,15 @@ function AddProduct() {
   }
 
   const handleInput = (e) => {
-    console.log("writing");
+    console.log(selected);
     const name = e.target.placeholder;
     const value = e.target.value;
     if (name == "price") {
       setNewProduct({ ...newProduct, [name]: parseInt(value) });
     } else if (name === "image") {
-      for(let x=0;x<e.target.files.length;x++) {
+      for (let x = 0; x < e.target.files.length; x++) {
         setMedia((elements) => [...elements, e.target.files[x]]);
-      };
+      }
     } else {
       setNewProduct({ ...newProduct, [name]: value });
     }
@@ -92,21 +96,24 @@ function AddProduct() {
     e.preventDefault();
     console.log(newProduct);
     setNewProduct({ ...newProduct, UID: user.uid });
-      const addProduct = async () => {
-        const ref1 = await addDoc(productCollectionRef, newProduct);
-        // add images to storage
+    const addProduct = async () => {
+      const ref1 = await addDoc(productCollectionRef, newProduct);
+      // add images to storage
       let temp = [];
-      media.forEach( async (element) => {
-        console.log(element)
+      media.forEach(async (element) => {
+        console.log(element);
         const imageRef = ref(storage, `images/${element.name}`);
         await uploadBytes(imageRef, element).then((snapshot) => {
           getDownloadURL(snapshot.ref).then((url) => {
             updateDoc(ref1, {
-              MediaID : arrayUnion(url)
+              MediaID: arrayUnion(url),
             });
           });
         });
-      });      
+      });
+      await updateDoc(ref1, {
+        keywords : selected
+      })
       console.log(ref1.id);
       const userRef = doc(db, "Users", user.uid);
       await updateDoc(userRef, {
@@ -203,7 +210,21 @@ function AddProduct() {
                     </div>
                   </MDBCol>
                 </MDBRow>
-
+                <hr className="mx-n3" />
+                <MDBRow>
+                  <MDBCol md="3" className="ps-5">
+                    <h6 className="mb-0">Add related keywords</h6>
+                  </MDBCol>
+                  <MDBCol>
+                    <TagsInput
+                      value={selected}
+                      onChange={setSelected}
+                      name="Keywords"
+                      placeHolder="Enter Keywords for easy search"
+                    />
+                    <em>press enter or comma to add new tag</em>
+                  </MDBCol>
+                </MDBRow>
                 <hr className="mx-n3" />
 
                 <MDBBtn
