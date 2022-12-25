@@ -26,9 +26,9 @@ import { SocialIcon } from 'react-social-icons';
       </MDBContainer>
 
       <div className='text-center p-3' style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
-        © 2020 Copyright:
-        <a className='text-white' href='https://mdbootstrap.com/'>
-          MDBootstrap.com
+        © 2022 Copyright:
+        <a className='text-white' href=''>
+           JUGAAD
         </a>
       </div>
     </MDBFooter>
