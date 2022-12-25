@@ -63,8 +63,8 @@ function Cart() {
     const name = e.target.name;
     const value = e.target.value;
     const val = -parseInt(cart[name].quantity) + parseInt(value);
-    setSum((sum) => sum + val * parseInt(cart[name].price));
     const updateCart = async () => {
+      setSum((sum) => sum + val * parseInt(cart[name].price));
       updateDoc(userRef, {
         Cart: arrayRemove({
           product: cart[name].pid,
@@ -82,7 +82,7 @@ function Cart() {
         )
       );
     };
-    updateCart();
+    if(value !== undefined && value !== "") updateCart();
   };
 
   const handleRemove = (e) => {
@@ -201,6 +201,7 @@ function Cart() {
                                 label="Quantity"
                                 name={cart.indexOf(product)}
                                 onChange={handleInput}
+                                
                               />
                             </div>
 

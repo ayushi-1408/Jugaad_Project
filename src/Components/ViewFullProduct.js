@@ -17,6 +17,7 @@ import {
 import UserContext from "../Contexts/UserContext";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Spinner from "./Spinner";
+import { Carousel } from "react-bootstrap";
 
 function ViewFullProduct(props) {
   const param = useParams();
@@ -103,19 +104,71 @@ function ViewFullProduct(props) {
     remWishList();
   };
 
+  const [index, setIndex] = useState(0);
+
+  const handleSelect = (selectedIndex, e) => {
+    setIndex(selectedIndex);
+  };
+
+
   return (
     <>
     {
       product !== undefined ? (
         <div>
         <Card>
-          <p style={{ alignContent: "center" }}>
-            <Card.Img
-              variant="top"
-              src={product.image}
-              style={{ maxWidth: "100px", maxHeight: "100px" }}
-            />
+          <div style={{ alignContent: "center", margin:"20px" }}>
+          <Carousel activeIndex={index} onSelect={handleSelect}>
+            {
+               product.MediaID !== undefined && product.MediaID.length !== 0 ? (
+                product.MediaID.map((element) => (
+                      <Carousel.Item key={element}>
+                      <img
+                        className="d-block w-100"
+                        src={element}
+                        alt="First slide"
+                      />
+                    </Carousel.Item>
+                    ))
+              ) : (
+                <Card.Img
+                  variant="top"
+                  src={ require('../no_image.png') }
+                  style={{ maxWidth: "100px", maxHeight: "100px" }}
+                />
+              )
+            }
+          
+               
+              
+      {/* <Carousel.Item>
+        <img
+          className="d-block w-100"
+          src="https://firebasestorage.googleapis.com/v0/b/jugaad-70ee9.appspot.com/o/images%2FScreenshot%20(5).png?alt=media&token=ab119342-b0d2-4d8a-b03d-eb489ee80d74"
+          alt="Second slide"
+        />
+
+        <Carousel.Caption>
+          <h3>Second slide label</h3>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        </Carousel.Caption>
+      </Carousel.Item>
+      <Carousel.Item>
+        <img
+          className="d-block w-100"
+          src="https://firebasestorage.googleapis.com/v0/b/jugaad-70ee9.appspot.com/o/images%2FScreenshot%20(3).png?alt=media&token=7056914a-5746-4425-a218-0cd90753d581"
+          alt="Third slide"
+        />
+
+        <Carousel.Caption>
+          <h3>Third slide label</h3>
+          <p>
+            Praesent commodo cursus magna, vel scelerisque nisl consectetur.
           </p>
+        </Carousel.Caption>
+      </Carousel.Item> */}
+    </Carousel>
+          </div>
           <Card.Body>
             <Card.Text>{product.title}</Card.Text>
           </Card.Body>
