@@ -60,7 +60,7 @@ export default function Blogs() {
     <>
     {
       blogs !== undefined ? (
-        <MDBRow className='row-cols-1 row-cols-md-3 g-4'>
+        <MDBRow className='row-cols-1 row-cols-md-3 g-4 mt-5 mb-5'>
         {blogs.map((blog) => (
           <MDBCol key={blog.id}>
           <MDBCard className='h-100'>

@@ -15,6 +15,7 @@ npm i mdb-ui-kit
 
 npm i react-social-icons
 
+npm install --save react-icons-kit
 
 
 Things to be viewed in User Profile -
