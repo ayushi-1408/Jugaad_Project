@@ -37,45 +37,39 @@ function App() {
   const [products, setProducts] = useState();
   const [blogs, setBlogs] = useState();
   const [events, setEvents] = useState();
-  const [order, setOrder] = useState();
 
-  
   return (
     <div className="App">
       <UserContext.Provider value={{ user, setUser }}>
-      <ProductContext.Provider value={{ products, setProducts }}>
-      <BlogsContext.Provider value={{ blogs, setBlogs }}>
-      <EventsContext.Provider value={{events, setEvents }}>
-        <BrowserRouter>
-          <Routes>
-              <Route path="/" element={<Navigationbar />}>
-              <Route index element={<HomePage />} />
-              
-              <Route path="login" element={<LoginSignup />} />
-              <Route path="about" element={<About />} />
-              <Route path="events" element={<Events />} />
-              <Route path="addEvent" element={<AddEvent />} />
-              <Route path="addBlog" element={<AddBlog />} />
-              <Route path="blogs" element={<Blogs />} />
-              <Route path="events" element={<Events />} />
-              <Route path="products" element={<Products />} />
-              <Route path="addProduct" element={<AddProduct />} />
-              <Route path="newUser" element={<NewUser />} />
-              <Route exact path="userProfile/:id" element={<UserProfile />} />
-              <Route exact path="viewBlog/:id" element={<ViewFullBlog />} />
-              <Route exact path="viewProduct/:id" element={<ViewFullProduct />} />
-
-              <Route path="cart" element={<Cart />} />
-              <Route path="placeOrder" element={<PlaceOrder />} />
-
-            </Route>
-            
-          </Routes>
-          <FooterPart/>
-        </BrowserRouter>
-      </EventsContext.Provider>
-      </BlogsContext.Provider>
-      </ProductContext.Provider>
+        <ProductContext.Provider value={{ products, setProducts }}>
+          <BlogsContext.Provider value={{ blogs, setBlogs }}>
+            <EventsContext.Provider value={{ events, setEvents }}>
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Navigationbar />}>
+                    <Route index element={<HomePage />} />
+                    <Route path="login" element={<LoginSignup />} />
+                    <Route path="about" element={<About />} />
+                    <Route path="events" element={<Events />} />
+                    <Route path="addEvent" element={<AddEvent />} />
+                    <Route path="addBlog" element={<AddBlog />} />
+                    <Route path="blogs" element={<Blogs />} />
+                    <Route path="events" element={<Events />} />
+                    <Route path="products" element={<Products />} />
+                    <Route path="addProduct" element={<AddProduct />} />
+                    <Route path="newUser" element={<NewUser />} />
+                    <Route path="userProfile/:id" element={<UserProfile />} />
+                    <Route path="viewBlog/:id" element={<ViewFullBlog />} />
+                    <Route path="viewProduct/:id" element={<ViewFullProduct />} />
+                    <Route path="cart" element={<Cart />} />
+                    <Route path="placeOrder" element={<PlaceOrder />} />
+                  </Route>
+                </Routes>
+                <FooterPart />
+              </BrowserRouter>
+            </EventsContext.Provider>
+          </BlogsContext.Provider>
+        </ProductContext.Provider>
       </UserContext.Provider>
     </div>
   );
