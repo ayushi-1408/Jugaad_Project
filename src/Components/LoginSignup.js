@@ -8,6 +8,8 @@ import UserContext from '../Contexts/UserContext';
 import {MDBContainer, MDBCol, MDBRow, MDBBtn, MDBIcon, MDBInput, MDBCheckbox } from 'mdb-react-ui-kit';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase-config';
+import { SocialIcon } from 'react-social-icons';
+
 
 export default function LoginSignup() {
 
@@ -178,17 +180,11 @@ export default function LoginSignup() {
 
             <p className="lead fw-normal mb-0 me-3">Sign in with</p>
 
-            <MDBBtn floating size='md' tag='a'  className='me-2' onClick={signInWithGoogle}>
-              <MDBIcon fab icon='google' >G</MDBIcon>
-            </MDBBtn>
-
-            <MDBBtn floating size='md' tag='a' className='me-2' onClick={signInWithFacebook}>
-            <MDBIcon fab icon="fab fa-facebook-square" >F</MDBIcon>
-            </MDBBtn>
-
-            <MDBBtn floating size='md' tag='a'  className='me-2' onClick={signInWithTwitter}>
-              <MDBIcon fab icon='twitter' >T</MDBIcon>
-            </MDBBtn>
+            
+            <SocialIcon network="google" className="m-3" onClick={signInWithGoogle} role='button'></SocialIcon>
+            <SocialIcon network="facebook" className="m-3" onClick={signInWithFacebook} role='button'></SocialIcon>
+            <SocialIcon network="twitter" className="m-3" onClick={signInWithTwitter} role='button'></SocialIcon>
+            
 
           </div>
 
@@ -215,26 +211,7 @@ export default function LoginSignup() {
 
       
 
-        <div>
-
-          <MDBBtn tag='a' color='none' className='mx-3' style={{ color: 'white' }}>
-            <MDBIcon fab icon='facebook-f' size="md"/>
-          </MDBBtn>
-
-          <MDBBtn tag='a' color='none' className='mx-3' style={{ color: 'white'  }}>
-            <MDBIcon fab icon='twitter' size="md"/>
-          </MDBBtn>
-
-          <MDBBtn tag='a' color='none' className='mx-3' style={{ color: 'white'  }}>
-            <MDBIcon fab icon='google' size="md"/>
-          </MDBBtn>
-
-          <MDBBtn tag='a' color='none' className='mx-3' style={{ color: 'white'  }}>
-            <MDBIcon fab icon='linkedin-in' size="md"/>
-          </MDBBtn>
-
-        </div>
-
+       
     
 
     </MDBContainer>
