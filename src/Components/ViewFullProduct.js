@@ -1,11 +1,14 @@
 import axios from "axios";
 import React, { useState, useEffect, useContext } from "react";
+import { Icon } from 'react-icons-kit'
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
+import {ic_add_shopping_cart} from 'react-icons-kit/md/ic_add_shopping_cart'
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { db } from "../firebase-config";
+import {heart} from 'react-icons-kit/fa/heart'
 import {
   collection,
   getDoc,
@@ -14,6 +17,12 @@ import {
   arrayUnion,
   arrayRemove,
 } from "firebase/firestore";
+import {
+  MDBBtn,
+  MDBContainer,
+  MDBRow,
+  MDBCol,
+} from "mdb-react-ui-kit";
 import UserContext from "../Contexts/UserContext";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Spinner from "./Spinner";
@@ -115,7 +124,15 @@ function ViewFullProduct(props) {
     <>
     {
       product !== undefined ? (
+        
         <div>
+           <MDBContainer fluid className="bg-success ">
+        <MDBRow className="d-flex justify-content-center align-items-center ">
+          <MDBCol lg="9" className="mt-5">
+            <h1 class="mb-4">{product.title}</h1>
+</MDBCol>
+</MDBRow>
+</MDBContainer>
         <Card>
           <div style={{ alignContent: "center", margin:"20px" }}>
           <Carousel activeIndex={index} onSelect={handleSelect}>
@@ -167,37 +184,55 @@ function ViewFullProduct(props) {
           </p>
         </Carousel.Caption>
       </Carousel.Item> */}
+     
     </Carousel>
           </div>
-          <Card.Body>
-            <Card.Text>{product.title}</Card.Text>
-          </Card.Body>
+          
         </Card>
         <br />
-        <Card>
+        <Card className="mb-10">
           <Card.Body>
             <Card.Text>{product.description}</Card.Text>
           </Card.Body>
           {
             addToCart === true ? (
-              <Button variant="primary" type="submit" onClick={handleCart}>
-            Add to Cart
-          </Button>
+              <>
+              <div className=' mx-md-n5 mb-3' >
+                    <MDBBtn  color="primary" size="sm" type="submit"  onClick={handleCart}>
+                    <Icon  icon={ic_add_shopping_cart}/>
+                     Add to Cart
+                    </MDBBtn>  
+                    </div>    
+          </>
             ) : (
-              <Button variant="light " disabled type="submit" >
-            Added to Cart
-          </Button>
+              <>
+               <div className=' mx-md-n5 mb-3' >
+                    <MDBBtn outline color="primary" size="sm"  disabled type="submit"  variant="light ">
+                    <Icon  icon={ic_add_shopping_cart}/>
+                    Added to Cart
+                    </MDBBtn>
+                    </div>
+              
+          </>
             )
           }
           {
             addToWishList === true ? (
-              <Button variant="light" type="submit" onClick={addWishList}>
-            Add to WishList
-          </Button>
+              <>
+              <div className=' mx-md-n5 mb-3' >
+                <MDBBtn  color='danger' size="sm" type="submit" onClick={addWishList}>
+                <Icon  icon={heart}/>
+                 Add to Wishlist
+                </MDBBtn>
+             </div>
+          </>
             ) : (
-              <Button variant="dark " type="submit" onClick={removeWishList}>
+              <div className=' mx-md-n5 mb-3' >
+              <Button variant="danger " type="submit" onClick={removeWishList}>
             Remove from WishList
           </Button>
+          </div>
+
             )
           }
           <Link to={`/userProfile/${product.UID}/`} >
