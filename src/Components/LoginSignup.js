@@ -26,7 +26,7 @@ export default function LoginSignup() {
     requestsMade:[],
     dob:"",
     email:"",
-    mobile:null,
+    mobile:undefined,
     OID:[],
     BID:[],
     Cart:[],

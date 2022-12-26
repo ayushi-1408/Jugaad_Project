@@ -1,4 +1,5 @@
 import React, { useContext, useEffect } from "react";
+import '../App.css';
 import { useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
@@ -36,10 +37,11 @@ import {
   list,
 } from "firebase/storage";
 import { TagsInput } from "react-tag-input-component";
+import { WithContext as ReactTags } from 'react-tag-input';
 
 function AddProduct() {
   const [newProduct, setNewProduct] = useState({
-    price: 0,
+    price: undefined,
     title: "",
     dateOfPosting: new Date(),
     description: "",
@@ -48,11 +50,25 @@ function AddProduct() {
     categories: [],
     BID: [],
     deliverySpan: 1,
-    keywords : []
+    keywords: [],
   });
   const [media, setMedia] = useState([]);
-  const [selected, setSelected] = useState([]);
+  const [tags, setTags] = React.useState([]);
 
+  const suggestions = [
+    { id: 'Vietnam', text: 'Vietnam' },
+    { id: 'Turkey', text: 'Turkey' },
+    { id: 'Thailand', text: 'Thailand' },
+    { id: 'India', text: 'India' },
+    { id: 'Indonesia', text: 'Indonesia' },
+  ]
+  
+  const KeyCodes = {
+    comma: 188,
+    enter: 13,
+  };
+  
+  const delimiters = [KeyCodes.comma, KeyCodes.enter];
   const productCollectionRef = collection(db, "Products");
 
   const { user, setUser } = useContext(UserContext);
@@ -78,7 +94,7 @@ function AddProduct() {
   }
 
   const handleInput = (e) => {
-    console.log(selected);
+    console.log(tags);
     const name = e.target.placeholder;
     const value = e.target.value;
     if (name == "price") {
@@ -112,8 +128,8 @@ function AddProduct() {
         });
       });
       await updateDoc(ref1, {
-        keywords : selected
-      })
+        keywords: tags,
+      });
       console.log(ref1.id);
       const userRef = doc(db, "Users", user.uid);
       await updateDoc(userRef, {
@@ -126,6 +142,29 @@ function AddProduct() {
     };
 
     addProduct();
+  };
+
+
+  const handleDelete = (i) => {
+    setTags(tags.filter((tag, index) => index !== i));
+  };
+
+  const handleAddition = (tag) => {
+    setTags([...tags, tag]);
+  };
+
+  const handleDrag = (tag, currPos, newPos) => {
+    const newTags = tags.slice();
+
+    newTags.splice(currPos, 1);
+    newTags.splice(newPos, 0, tag);
+
+    // re-render
+    setTags(newTags);
+  };
+
+  const handleTagClick = (index) => {
+    console.log('The tag at index ' + index + ' was clicked');
   };
 
   return (
@@ -217,12 +256,23 @@ function AddProduct() {
                   </MDBCol>
                   <MDBCol>
                     <TagsInput
-                      value={selected}
-                      onChange={setSelected}
+                      value={tags}
+                      onChange={setTags}
                       name="Keywords"
-                      placeHolder="Enter Keywords for easy search"
+                      placeHolder="Press Enter to add Keywords"
                     />
-                    <em>press enter or comma to add new tag</em>
+                    {/* <ReactTags
+                      tags={tags}
+                      suggestions={suggestions}
+                      delimiters={delimiters}
+                      handleDelete={handleDelete}
+                      handleAddition={handleAddition}
+                      handleDrag={handleDrag}
+                      handleTagClick={handleTagClick}
+                      inputFieldPosition="bottom"
+                      autocomplete
+                      editable
+                    /> */}
                   </MDBCol>
                 </MDBRow>
                 <hr className="mx-n3" />
