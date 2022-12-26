@@ -61,25 +61,25 @@ function Cart() {
     });
   }
 
-  const handleInput = (e) => {
+  const handleInput = (index,value) => {
     const userRef = doc(db, "Users", user.uid);
-    const name = e.target.name;
-    const value = e.target.value;
-    const val = -parseInt(cart[name].quantity) + parseInt(value);
+    // const name = e.target.name;
+    //const value = e.target.value;
+    const val = -parseInt(cart[index].quantity) + parseInt(value);
     const updateCart = async () => {
-      setSum((sum) => sum + val * parseInt(cart[name].price));
+      setSum((sum) => sum + val * parseInt(cart[index].price));
       updateDoc(userRef, {
         Cart: arrayRemove({
-          product: cart[name].pid,
-          quantity: cart[name].quantity,
+          product: cart[index].pid,
+          quantity: cart[index].quantity,
         }),
       });
       updateDoc(userRef, {
-        Cart: arrayUnion({ product: cart[name].pid, quantity: value }),
+        Cart: arrayUnion({ product: cart[index].pid, quantity: value }),
       });
       setCart(
         cart.map((product) =>
-          product.pid === cart[name].pid
+          product.pid === cart[index].pid
             ? { ...product, quantity: value }
             : { ...product }
         )
@@ -88,24 +88,42 @@ function Cart() {
     if(value !== undefined && value !== "") updateCart();
   };
 
-  const handleRemove = (e) => {
+  const handleRemove = (index) => {
     console.log("removing");
+    // const name = e.target.name;
+    // console.log(cart);
+    // console.log(name);
+    // console.log(cart[index])
     const userRef = doc(db, "Users", user.uid);
-    const name = e.target.name;
-    const val = -parseInt(cart[name].quantity);
-    setSum((sum) => sum + val * parseInt(cart[name].price));
+    const val = -parseInt(cart[index].quantity);
+    setSum((sum) => sum + val * parseInt(cart[index].price));
     const updateCart = async () => {
       updateDoc(userRef, {
         Cart: arrayRemove({
-          product: cart[name].pid,
-          quantity: cart[name].quantity,
+          product: cart[index].pid,
+          quantity: cart[index].quantity,
         }),
       });
       setCart((products) =>
-        products.filter((product) => product.pid !== cart[name].pid)
+        products.filter((product) => product.pid !== cart[index].pid)
       );
     };
     updateCart();
+  };
+
+  const handleWishList = (index) => {
+    console.log("adding to wishlist")
+    const userRef = doc(db, "Users", user.uid);
+    // const name = e.target.name;
+    console.log(index)
+    console.log(cart[index])
+    const updateWishList = async () => {
+      updateDoc(userRef, {
+        WishPID: arrayUnion(cart[index].pid),
+      });
+      alert('Added to WishList')
+    };
+    updateWishList();
   };
 
   useEffect(() => {
@@ -145,9 +163,9 @@ function Cart() {
                     </MDBTypography>
                   </MDBCardHeader>
                   <MDBCardBody>
-                    {cart.map((product) => (
+                    {cart.map((product,index) => (
                       <>
-                        <MDBRow key={product.pid}>
+                        <MDBRow >
                           <MDBCol lg="3" md="12" className="mb-4 mb-lg-0">
                             <MDBRipple
                               rippleTag="div"
@@ -178,8 +196,7 @@ function Cart() {
                               wrapperClass="me-1 m-3"
                               title="Remove item"
                               type="button"
-                              onClick={handleRemove}
-                              name={cart.indexOf(product)}
+                              onClick={e => handleRemove(index)}
                             >
                               <Icon  icon={bin2}/>
                             </MDBBtn>
@@ -188,8 +205,10 @@ function Cart() {
                               wrapperProps={{color: "danger" }}
                               wrapperClass="me-1 m-3"
                               title="Move to the wish list"
+                              
                             >
-                             <Icon  icon={heart}/>
+                             <Icon  icon={heart} onClick={e => handleWishList(index)}
+                              />
                             </MDBTooltip>
                           </MDBCol>
                           <MDBCol lg="4" md="6" className="mb-4 mb-lg-0">
@@ -202,8 +221,7 @@ function Cart() {
                                 min={1}
                                 type="number"
                                 label="Quantity"
-                                name={cart.indexOf(product)}
-                                onChange={handleInput}
+                                onChange={e => handleInput(index,e.target.value)}
                                 
                               />
                             </div>
