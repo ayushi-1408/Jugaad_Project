@@ -5,6 +5,7 @@ import {
 } from "firebase/auth";
 import { Icon } from 'react-icons-kit'
 import {bin2} from 'react-icons-kit/icomoon/bin2'
+
 import {
   arrayRemove,
   arrayUnion,
@@ -102,7 +103,7 @@ function Cart() {
         Cart: arrayRemove({
           product: cart[index].pid,
           quantity: cart[index].quantity,
-        }),
+        })
       });
       setCart((products) =>
         products.filter((product) => product.pid !== cart[index].pid)

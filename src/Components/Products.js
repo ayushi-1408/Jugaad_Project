@@ -6,7 +6,9 @@ import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 import { Link } from "react-router-dom";
 import { db } from "../firebase-config";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, Query } from "firebase/firestore";
+import { Icon } from 'react-icons-kit'
+import {search} from 'react-icons-kit/icomoon/search'
 import {
   MDBContainer,
   MDBRow,
@@ -17,6 +19,7 @@ import {
   MDBIcon,
   MDBBtn,
   MDBRipple,
+  MDBTooltip,
 } from "mdb-react-ui-kit";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useContext } from "react";
@@ -24,27 +27,37 @@ import { Navigate, useNavigate } from "react-router-dom";
 import UserContext from "../Contexts/UserContext";
 import Spinner from "./Spinner";
 import ProductContext from "../Contexts/ProductsContext";
+import { query, where } from "firebase/firestore";  
 
 export default function Products() {
   //const [products,setProducts] = useState()
   const productCollectionRef = collection(db, "Products");
   const { user, setUser } = useContext(UserContext);
   const { products, setProducts } = useContext(ProductContext);
+  const [filteredProducts, setFilteredProducts] = useState();
   const auth = getAuth();
 
+  const [suggestions, setSuggestion ] = useState([
+    // 'red shirt',
+    // 'while pant',
+    // 'uniform',
+    // 'clothing'
+  ])
+
   useEffect(() => {
-    if (products === undefined) {
+    if (products === undefined || filteredProducts === undefined) {
       const getProducts = async () => {
         const data = await getDocs(productCollectionRef);
         //console.log(data)
         setProducts(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+        setFilteredProducts(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
         //console.log(products)
       };
 
       getProducts();
       //console.log(products)
     }
-  }, [!products]);
+  }, [products]);
 
   if (user == undefined || user.uid == undefined) {
     onAuthStateChanged(auth, (userr) => {
@@ -60,16 +73,91 @@ export default function Products() {
     });
   }
 
+  const [searchedItem, setSearchedItem] = useState("");
+
+  const setSearch = (value) => {
+    console.log(value);
+    setSearchedItem(value);
+    // suggestions.forEach(product => {
+    //   console.log(product +" " +product.toLowerCase().includes(value.toLowerCase()))
+    // });
+    if(value !== "" ) setSuggestion(products.filter((element) => element.title.toLowerCase().includes(value.toLowerCase())).map((element) => (element.title)))
+    else setSuggestion([])
+    console.log(suggestions)
+  }
+
+  const findProducts = () => {
+    setSuggestion()
+    const keywordArray = searchedItem.toLowerCase().split(" ");
+    console.log(keywordArray)
+    // const getData = async () => {
+    //   const q = query(productCollectionRef, 
+    //     where('keywords', 'array-contains-any', keywordArray));
+    //     const data = await getDocs(q);
+    //     setProducts(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+        
+    // }
+    const getData = () => {
+      setFilteredProducts(products.map((product) => ({...product, matchCount: findMatchCount(product.keywords,keywordArray)})).filter((product) => product.matchCount !== 0).sort((p1,p2) => p2.matchCount - p1.matchCount))
+    }
+    if(searchedItem !== "") getData();
+    
+    
+  }
+
+  const findMatchCount = (keywords, words) => {
+    let c=0;
+    if(keywords !== undefined) words.forEach(element => {
+      if(keywords.includes(element)) c++;
+    });
+    console.log(keywords+" "+c)
+    return c;
+  }
+
+  const clearSearch = (e) => {
+    setFilteredProducts(products.map((doc) => ({ ...doc })));
+    console.log(products)
+    console.log(filteredProducts)
+  }
+
   return (
     <>
-      {products !== undefined ? (
+
+    {/* search bar */}
+    <MDBRow>
+    <MDBCol md="6">
+      <input className="form-control" type="text" placeholder="Search" aria-label="Search" value={searchedItem} onChange={e => setSearch(e.target.value)} />
+      <Icon icon={search} onClick={findProducts} />
+      <Button onClick={clearSearch}>Clear search</Button>
+    </MDBCol>
+    </MDBRow>
+    <MDBRow>
+    <MDBCol>
+      {
+        suggestions !== undefined && suggestions.length !== 0 ? (
+          suggestions
+          .map((element) => {
+            return (
+              <div onClick={ e => setSearch(element)}>{element}</div>
+            )
+          })
+        ) :(
+          <></>
+        )
+      }
+    </MDBCol>
+    </MDBRow>
+
+
+    
+      {filteredProducts !== undefined && filteredProducts.length !== 0 ? (
         <MDBContainer fluid className="my-5 text-center">
           <h4 className="mt-4 mb-5">
             <strong>Our Products</strong>
           </h4>
 
           <MDBRow>
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <MDBCol md="12" lg="4" className="mb-4" key={product.id}>
                 <MDBCard>
                   <MDBRipple

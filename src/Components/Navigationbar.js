@@ -32,7 +32,7 @@ function Navigationbar() {
 
   return (
     <div>
-      <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark"  fixed="top" position="relative" className="route-outlet" >
+      <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark"   position="relative" className="route-outlet" >
         <Container>
           <Navbar.Brand href="/">JUGAAD</Navbar.Brand>
           <Navbar.Toggle aria-controls="responsive-navbar-nav" />
