@@ -18,9 +18,20 @@ import {
   MDBTypography,
   MDBRipple,
 } from "mdb-react-ui-kit";
+import {
+
+  MDBModal,
+  MDBModalDialog,
+  MDBModalContent,
+  MDBModalHeader,
+  MDBModalTitle,
+  MDBModalBody,
+  MDBModalFooter,
+} from 'mdb-react-ui-kit';
 import Spinner from "./Spinner";
 
 export default function UserProfile(props) {
+  const [scrollableModal, setScrollableModal] = useState(false);
   const param = useParams();
   const { id } = param;
   console.log("User to be seen " + id);
@@ -272,30 +283,7 @@ export default function UserProfile(props) {
           <MDBContainer className="py-5 h-100">
             <MDBRow className="justify-content-center align-items-center h-100">
               <MDBCol lg="9" xl="7">
-              <Link
-                to="/addProduct"
-                style={{
-                  textDecoration: "none",
-                  color: "white",
-                  marginRight: "15px",
-                }}
-              >Add New Product</Link>
-              <Link
-                to="/addBlog"
-                style={{
-                  textDecoration: "none",
-                  color: "white",
-                  marginRight: "15px",
-                }}
-              >Add new Blog</Link>
-              <Link
-                to="/addEvent"
-                style={{
-                  textDecoration: "none",
-                  color: "white",
-                  marginRight: "15px",
-                }}
-              >Add New Event</Link>
+              
                 <MDBCard>
                   
                   <div
@@ -334,27 +322,60 @@ export default function UserProfile(props) {
                     style={{ backgroundColor: "#f8f9fa" }}
                   >
                     <div className="d-flex justify-content-end text-center py-1">
-                      <div>
-                        <MDBCardText className="mb-1 h5">253</MDBCardText>
-                        <MDBCardText className="small text-muted mb-0">
-                          Photos
-                        </MDBCardText>
-                      </div>
-                      <div className="px-3">
-                        <MDBCardText className="mb-1 h5">1026</MDBCardText>
-                        <MDBCardText className="small text-muted mb-0">
+                    <div className="px-3">
+                        <MDBCardText className="mb-1 h5" role='button' onClick={() => setScrollableModal(!scrollableModal) } >1026</MDBCardText>
+                        <MDBCardText className="small text-muted mb-0" role='button' onClick={() => setScrollableModal(!scrollableModal)}>
                           Followers
                         </MDBCardText>
                       </div>
-                      <div>
-                        <MDBCardText className="mb-1 h5">478</MDBCardText>
-                        <MDBCardText className="small text-muted mb-0">
-                          Following
-                        </MDBCardText>
-                      </div>
+      <MDBModal show={scrollableModal} setShow={setScrollableModal} tabIndex='-1'>
+        <MDBModalDialog scrollable>
+          <MDBModalContent>
+            <MDBModalHeader>
+              <MDBModalTitle>Modal title</MDBModalTitle>
+              <MDBBtn
+                className='btn-close'
+                color='none'
+                onClick={() => setScrollableModal(!scrollableModal)}
+              ></MDBBtn>
+            </MDBModalHeader>
+            <MDBModalBody>
+              <p>
+                Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in,
+                egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
+                
+             </p>
+             <p>
+                Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in,
+                egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
+             </p>
+             <p>
+                Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in,
+                egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
+             </p>
+             <p>
+                Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in,
+                egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
+             </p>
+            </MDBModalBody>
+            <MDBModalFooter>
+              <MDBBtn color='secondary' onClick={() => setScrollableModal(!setScrollableModal)}>
+                Close
+              </MDBBtn>
+              <MDBBtn>Save changes</MDBBtn>
+            </MDBModalFooter>
+          </MDBModalContent>
+        </MDBModalDialog>
+      </MDBModal>
+      
+    
+
+                      
+                     
                     </div>
                   </div>
                   <MDBCardBody className="text-black p-4">
+                    
                     <div className="mb-5">
                       <p className="lead fw-normal mb-1">About</p>
                       <div
@@ -368,8 +389,46 @@ export default function UserProfile(props) {
                     <MDBCardText className="font-italic mb-0">Photographer</MDBCardText> */}
                       </div>
                     </div>
+                    <MDBBtn className='me-1' color='success' >
+                    Add New Product
+      </MDBBtn>
+      
+      <MDBBtn className='me-1' color='warning'>
+      Add new Blog
+      </MDBBtn>
+      
+      <MDBBtn color='info'>
+      Add new Event
+      </MDBBtn>
+      <MDBBtn className='me-1 ms-1' span color='danger'>
+      My Orders
+      </MDBBtn>
+                    {/* <Link
+                to="/addProduct"
+                style={{
+                  textDecoration: "none",
+                  role:"button",
+                  marginRight: "15px",
+                }}
+              >Add New Product</Link>
+              // <Link
+              //   to="/addBlog"
+              //   style={{
+              //     textDecoration: "none",
+                  
+              //     marginRight: "15px",
+              //   }}
+              // >Add new Blog</Link>
+              <Link
+                to="/addEvent"
+                style={{
+                  textDecoration: "none",
+                  
+                  marginRight: "15px",
+                }}
+              >Add New Event</Link> */}
                     <div className="d-flex justify-content-between align-items-center mb-4">
-                      <MDBCardText className="lead fw-normal mb-0">
+                      <MDBCardText className="lead fw-normal mt-3">
                         Recent Blogs
                       </MDBCardText>
                       <MDBCardText className="mb-0">
@@ -425,21 +484,27 @@ export default function UserProfile(props) {
                   <strong> {viewUserProfile.name}'s Products</strong>
                 )}
               </h4>
+              
 
+    {/* /////////////////////////////////// */}
               <MDBRow>
                 {myProducts.map((product) => (
-                  <MDBCol md="12" lg="4" className="mb-4" key={product.pid}>
+                  <MDBCol md="12" lg="3" className="mb-4" key={product.pid}>
                     <MDBCard>
-                      <MDBRipple
-                        rippleColor="light"
-                        rippleTag="div"
-                        className="bg-image rounded hover-zoom"
-                      >
-                        <MDBCardImage
-                          src={product.image}
-                          fluid
-                          className="w-100"
-                        />
+                    <MDBRipple className='bg-image' rippleTag='div' rippleColor='light'>
+      <img src={product.image} className='w-100' />
+      <a href='#!'>
+        <div className='mask' style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)' }}>
+          <div className='d-flex justify-content-center align-items-center h-100'>
+            <p className='text-white mb-0'>{product.title}</p>
+          </div>
+        </div>
+        <div className='hover-overlay'>
+          <div className='mask' style={{ backgroundColor: 'rgba(251, 251, 251, 0.2)' }}></div>
+        </div>
+      </a>
+    
+                        
                         <Link to={`/viewProduct/${product.pid}`}>
                           <div className="mask">
                             <div className="d-flex justify-content-start align-items-end h-100">
@@ -465,7 +530,7 @@ export default function UserProfile(props) {
                           to={`/viewProduct/${product.pid}`}
                           className="text-reset"
                         >
-                          <h5 className="card-title mb-3">{product.title}</h5>
+                          <h5 className="card-title mb-3"></h5>
                         </Link>
                         <Link
                           to={`/viewProduct/${product.pid}`}
@@ -486,7 +551,7 @@ export default function UserProfile(props) {
 
           { user.uid === id && wishList !== undefined && wishList.length !== 0 ? (
             <MDBContainer fluid className="my-5 text-center">
-              <h4 className="mt-4 mb-5">
+              <h4 className="mt-4 mb-3">
                 <strong> My Wishlist</strong> : <></>
               </h4>
 
