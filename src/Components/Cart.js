@@ -3,18 +3,20 @@ import {
   getAuth,
   onAuthStateChanged,
 } from "firebase/auth";
-import { Icon } from 'react-icons-kit'
-import {bin2} from 'react-icons-kit/icomoon/bin2'
+import { Icon } from "react-icons-kit";
+import { bin2 } from "react-icons-kit/icomoon/bin2";
 
 import {
+  addDoc,
   arrayRemove,
   arrayUnion,
+  collection,
   doc,
   getDoc,
   getDocs,
   updateDoc,
 } from "firebase/firestore";
-import {heart} from 'react-icons-kit/icomoon/heart'
+import { heart } from "react-icons-kit/icomoon/heart";
 import React, { useEffect } from "react";
 import { useState } from "react";
 import { useContext } from "react";
@@ -39,8 +41,16 @@ import {
   MDBRow,
   MDBTooltip,
   MDBTypography,
+  MDBModal,
+  MDBModalDialog,
+  MDBModalContent,
+  MDBModalHeader,
+  MDBModalTitle,
+  MDBModalBody,
+  MDBModalFooter,
 } from "mdb-react-ui-kit";
 import Spinner from "./Spinner";
+import StripeCheckout from "react-stripe-checkout";
 
 function Cart() {
   const { user, setUser } = useContext(UserContext);
@@ -53,16 +63,20 @@ function Cart() {
   if (user == undefined || user.uid == undefined) {
     onAuthStateChanged(auth, (userr) => {
       if (userr) {
-        console.log(userr);
-        setUser({ uid: userr.uid });
+        // console.log(userr);
+        const getUser = async () => {
+          const userRef = doc(db, "Users", userr.uid);
+          const data = await getDoc(userRef);
+          setUser({ ...data.data(), uid: userr.uid });
+        };
+        getUser();
       } else {
-        console.log("not signed");
         nav("/login");
       }
     });
   }
 
-  const handleInput = (index,value) => {
+  const handleInput = (index, value) => {
     const userRef = doc(db, "Users", user.uid);
     // const name = e.target.name;
     //const value = e.target.value;
@@ -86,7 +100,7 @@ function Cart() {
         )
       );
     };
-    if(value !== undefined && value !== "") updateCart();
+    if (value !== undefined && value !== "") updateCart();
   };
 
   const handleRemove = (index) => {
@@ -103,7 +117,7 @@ function Cart() {
         Cart: arrayRemove({
           product: cart[index].pid,
           quantity: cart[index].quantity,
-        })
+        }),
       });
       setCart((products) =>
         products.filter((product) => product.pid !== cart[index].pid)
@@ -113,16 +127,16 @@ function Cart() {
   };
 
   const handleWishList = (index) => {
-    console.log("adding to wishlist")
+    console.log("adding to wishlist");
     const userRef = doc(db, "Users", user.uid);
     // const name = e.target.name;
-    console.log(index)
-    console.log(cart[index])
+    console.log(index);
+    console.log(cart[index]);
     const updateWishList = async () => {
       updateDoc(userRef, {
         WishPID: arrayUnion(cart[index].pid),
       });
-      alert('Added to WishList')
+      alert("Added to WishList");
     };
     updateWishList();
   };
@@ -150,6 +164,40 @@ function Cart() {
     if (user !== undefined) getCart();
   }, [!user]);
 
+  const [basicModal, setBasicModal] = useState(false);
+
+  const [ordereing, setOrdering] = useState(false);
+
+  const toggleShow = () => setBasicModal(!basicModal);
+
+  const onToken = (token) => {
+    setOrdering(true);
+    const orderRef=collection(db, "Orders");
+    const addOrder = async () => {
+      const ref1 = await addDoc(orderRef,{
+        UID:user.uid,
+        Products:cart.map((p) => ({PID:p.pid,quantity:p.quantity})),
+        Amount:sum,
+        Address:user.address,
+        mobile:user.mobile,
+        paymentMode:"online",
+        paymentStatus:1
+      });
+      const userRef = doc(db, "Users", user.uid);
+      await updateDoc(userRef, {
+        Cart:[],
+        Orders:arrayUnion(ref1.id)
+      })
+      setOrdering(false);
+      toggleShow();
+      setSum(0);
+      setCart([]);
+
+      alert('Order Placed...Kindly check in My Orders.');
+    }
+    addOrder();
+   }
+
   return (
     <>
       {cart !== undefined ? (
@@ -164,9 +212,9 @@ function Cart() {
                     </MDBTypography>
                   </MDBCardHeader>
                   <MDBCardBody>
-                    {cart.map((product,index) => (
+                    {cart.map((product, index) => (
                       <>
-                        <MDBRow >
+                        <MDBRow>
                           <MDBCol lg="3" md="12" className="mb-4 mb-lg-0">
                             <MDBRipple
                               rippleTag="div"
@@ -193,22 +241,22 @@ function Cart() {
                             <p>Size: M</p>
 
                             <MDBBtn
-                             
                               wrapperClass="me-1 m-3"
                               title="Remove item"
                               type="button"
-                              onClick={e => handleRemove(index)}
+                              onClick={(e) => handleRemove(index)}
                             >
-                              <Icon  icon={bin2}/>
+                              <Icon icon={bin2} />
                             </MDBBtn>
 
                             <MDBTooltip
-                              wrapperProps={{color: "danger" }}
+                              wrapperProps={{ color: "danger" }}
                               wrapperClass="me-1 m-3"
                               title="Move to the wish list"
-                              
                             >
-                             <Icon  icon={heart} onClick={e => handleWishList(index)}
+                              <Icon
+                                icon={heart}
+                                onClick={(e) => handleWishList(index)}
                               />
                             </MDBTooltip>
                           </MDBCol>
@@ -222,8 +270,9 @@ function Cart() {
                                 min={1}
                                 type="number"
                                 label="Quantity"
-                                onChange={e => handleInput(index,e.target.value)}
-                                
+                                onChange={(e) =>
+                                  handleInput(index, e.target.value)
+                                }
                               />
                             </div>
 
@@ -309,7 +358,7 @@ function Cart() {
                       </MDBListGroupItem>
                     </MDBListGroup>
 
-                    <MDBBtn block size="lg">
+                    <MDBBtn block size="lg" onClick={toggleShow}>
                       Go to checkout
                     </MDBBtn>
                   </MDBCardBody>
@@ -317,6 +366,63 @@ function Cart() {
               </MDBCol>
             </MDBRow>
           </MDBContainer>
+          <MDBModal show={basicModal} setShow={setBasicModal} tabIndex="-1">
+            <MDBModalDialog>
+              <MDBModalContent>
+                <MDBModalHeader>
+                  <MDBModalTitle>Order Summary</MDBModalTitle>
+                  <MDBBtn
+                    className="btn-close"
+                    color="none"
+                    onClick={toggleShow}
+                  ></MDBBtn>
+                </MDBModalHeader>
+                <MDBModalBody>
+                  {
+                    ordereing ? (
+                      <>
+                      <Spinner/>
+                      <h6>Confirming Order Details...</h6>
+                      </>
+                      
+                    ) : (
+                      <>
+                      <div><strong>Products</strong></div>
+                  {
+                    cart.map((element) => (
+                      <>
+                      <div>{element.title} - ${element.price} - {element.quantity}</div>
+            
+                      </>
+                    ))
+                  }
+                  <hr className="mx-n6" />
+                  <div><strong>Total Amount - </strong>$ {sum}</div>
+                  <hr className="mx-n6" />
+                  <div><strong>Shipping Address</strong></div>
+                  <div>{user.address}</div> 
+                      </>
+                    )
+                  }
+
+                
+
+                </MDBModalBody>
+
+                <MDBModalFooter>
+                  <MDBBtn color="secondary" onClick={toggleShow}>
+                    Cancel
+                  </MDBBtn>
+                  <StripeCheckout
+                    token={onToken}
+                    name="Order Payment"
+                    amount={sum*100}
+                    stripeKey="pk_test_51MJZ1KSB9uQMp7kpVr3EVPsGdDqnHFRiLsi5dAuNaLqgJSUEFk7RB8sV2zIiZHF3IxmKstQ6IqTNSEBhB7zJBGVf00RdHIGoiv"
+                  />
+                </MDBModalFooter>
+              </MDBModalContent>
+            </MDBModalDialog>
+          </MDBModal>
         </section>
       ) : (
         <Spinner />
