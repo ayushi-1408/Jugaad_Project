@@ -7,9 +7,9 @@ import Row from "react-bootstrap/Row";
 import { Link } from "react-router-dom";
 import { db } from "../firebase-config";
 import { collection, getDocs, doc, getDoc, Query } from "firebase/firestore";
-import { Icon } from 'react-icons-kit'
-import {search} from 'react-icons-kit/icomoon/search'
-
+import { Icon } from "react-icons-kit";
+import { search } from "react-icons-kit/icomoon/search";
+import { x } from "react-icons-kit/oct/x";
 
 import {
   MDBContainer,
@@ -29,7 +29,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import UserContext from "../Contexts/UserContext";
 import Spinner from "./Spinner";
 import ProductContext from "../Contexts/ProductsContext";
-import { query, where } from "firebase/firestore";  
+import { query, where } from "firebase/firestore";
 
 export default function Products() {
   //const [products,setProducts] = useState()
@@ -39,12 +39,12 @@ export default function Products() {
   const [filteredProducts, setFilteredProducts] = useState();
   const auth = getAuth();
 
-  const [suggestions, setSuggestion ] = useState([
+  const [suggestions, setSuggestion] = useState([
     // 'red shirt',
     // 'while pant',
     // 'uniform',
     // 'clothing'
-  ])
+  ]);
 
   useEffect(() => {
     if (products === undefined || filteredProducts === undefined) {
@@ -52,7 +52,9 @@ export default function Products() {
         const data = await getDocs(productCollectionRef);
         //console.log(data)
         setProducts(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-        setFilteredProducts(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
+        setFilteredProducts(
+          data.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+        );
         //console.log(products)
       };
 
@@ -83,98 +85,143 @@ export default function Products() {
     // suggestions.forEach(product => {
     //   console.log(product +" " +product.toLowerCase().includes(value.toLowerCase()))
     // });
-    if(value !== "" ) setSuggestion(products.filter((element) => element.title.toLowerCase().includes(value.toLowerCase())).map((element) => (element.title)))
-    else setSuggestion([])
-    console.log(suggestions)
-  }
+    if (value !== "")
+      setSuggestion(
+        products
+          .filter((element) =>
+            element.title.toLowerCase().includes(value.toLowerCase())
+          )
+          .map((element) => element.title)
+      );
+    else setSuggestion([]);
+    console.log(suggestions);
+  };
 
   const findProducts = () => {
-    setSuggestion()
+    setSuggestion();
     const keywordArray = searchedItem.toLowerCase().split(" ");
-    console.log(keywordArray)
-    // const getData = async () => {
-    //   const q = query(productCollectionRef, 
-    //     where('keywords', 'array-contains-any', keywordArray));
-    //     const data = await getDocs(q);
-    //     setProducts(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-        
-    // }
+    console.log(keywordArray);
+
     const getData = () => {
-      setFilteredProducts(products.map((product) => ({...product, matchCount: findMatchCount(product.keywords,keywordArray)})).filter((product) => product.matchCount !== 0).sort((p1,p2) => p2.matchCount - p1.matchCount))
-    }
-    if(searchedItem !== "") getData();
-    
-    
-  }
+      setFilteredProducts(
+        products
+          .map((product) => ({
+            ...product,
+            matchCount: findMatchCount(product.keywords, keywordArray),
+          }))
+          .filter((product) => product.matchCount !== 0)
+          .sort((p1, p2) => p2.matchCount - p1.matchCount)
+      );
+    };
+    if (searchedItem !== "") getData();
+  };
 
   const findMatchCount = (keywords, words) => {
-    let c=0;
-    if(keywords !== undefined) words.forEach(element => {
-      if(keywords.includes(element)) c++;
-    });
-    console.log(keywords+" "+c)
+    let c = 0;
+    if (keywords !== undefined)
+      words.forEach((element) => {
+        if (keywords.includes(element)) c++;
+      });
+    console.log(keywords + " " + c);
     return c;
-  }
+  };
 
   const clearSearch = (e) => {
+    setSearchedItem("");
+    setSuggestion();
     setFilteredProducts(products.map((doc) => ({ ...doc })));
-    console.log(products)
-    console.log(filteredProducts)
-  }
+    console.log(products);
+    console.log(filteredProducts);
+  };
 
   return (
-    < >
+    <>
+      {/* search bar */}
 
-    {/* search bar */}
-  
-    <MDBCol md="6" >
-      <input className=" mx-5 form-control  hoverable mt-3" type="text" placeholder="Search" aria-label="Search" value={searchedItem} onChange={e => setSearch(e.target.value)} ></input>
-      
-      <Button onClick={clearSearch} className='mt-2'>
-      <Icon icon={search} onClick={findProducts} />
-      Clear search</Button>
-      
-    </MDBCol>
-    
-    <MDBRow>
-    <MDBCol>
-      {
-        suggestions !== undefined && suggestions.length !== 0 ? (
-          suggestions
-          .map((element) => {
-            return (
-              <div onClick={ e => setSearch(element)}>{element}</div>
-            )
-          })
-        ) :(
-          <></>
-        )
-      }
-    </MDBCol>
-    </MDBRow>
+      <div>
+        <div className=" md-5 d-flex justify-content-center mt-3 me-5 ">
+          <div className="d-flex align-self-center">
+            <div>
+              <input
+                className="form-control  hoverable "
+                placeholder="Search"
+                style={{ width: "300px" , border:"1px solid darkgray"}}
+                type="text"
+                aria-label="Search"
+                value={searchedItem}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={e => {if(e.key=="Enter") findProducts()}}
+              ></input>
+              <div style={{borderRight: "1px solid darkgray", borderLeft: "1px solid darkgray"}}>
+                {suggestions !== undefined && suggestions.length !== 0 ? (
+                  suggestions.map((element) => {
+                    return (
+                      <>
+                        <div
+                          style={{ borderBottom: "1px solid darkgray", fontWeight:"bold"}}
+                          onClick={(e) => {
+                            setSearch(element);
+                            findProducts();
+                          }}
+                        >
+                          {element}
+                        </div>
+                      </>
+                    );
+                  })
+                ) : (
+                  <></>
+                )}
+              </div>
+            </div>
 
+            {searchedItem !== undefined && searchedItem !== "" ? (
+              <div className="m-2 d-flex align-self-start align-items-center">
+                <div>
+                  <Icon icon={x} onClick={(e) => clearSearch()} />
+                </div>
+              </div>
+            ) : (
+              <></>
+            )}
+          </div>
+        </div>
+      </div>
 
-    
       {filteredProducts !== undefined && filteredProducts.length !== 0 ? (
-        <MDBContainer fluid className="my-5 text-center" style={{alignContent:"center"}}>
-          <h3 className="mt-4 mb-5">
-            <strong>Our Products</strong>
-          </h3>
-
-          <MDBRow style={{alignSelf:"center"}}>
+        <MDBContainer
+          fluid
+          className="my-5 text-center"
+          style={{ alignContent: "center" }}
+        >
+          <MDBRow style={{ alignSelf: "center" }}>
             {filteredProducts.map((product) => (
-              <MDBCol className="my-2 col-md-4 col-lg-3 col-sm-12" key={product.id} >
-                <Link to={`/viewProduct/${product.id}`} style={{textDecoration:"none", color:"black"}}>
-                <MDBCard style={{maxWidth:"300px"}}>
-                  <MDBRipple
-                    rippleColor="light"
-                    rippleTag="div"
-                    className="bg-image rounded hover-zoom"
-                  >
-                    <MDBCardImage src={product.MediaID !== undefined && product.MediaID.length !== 0 ? product.MediaID[0] : require('../default_image.webp')} 
-                    fluid className="w-100"  style={{height:"250px", }}
-                    />
-                    
+              <MDBCol
+                className="my-2 col-md-4 col-lg-3 col-sm-12"
+                key={product.id}
+              >
+                <Link
+                  to={`/viewProduct/${product.id}`}
+                  style={{ textDecoration: "none", color: "black" }}
+                >
+                  <MDBCard style={{ maxWidth: "300px" }}>
+                    <MDBRipple
+                      rippleColor="light"
+                      rippleTag="div"
+                      className="bg-image rounded hover-zoom"
+                    >
+                      <MDBCardImage
+                        src={
+                          product.MediaID !== undefined &&
+                          product.MediaID.length !== 0
+                            ? product.MediaID[0]
+                            : require("../default_image.webp")
+                        }
+                        fluid
+                        className="w-100"
+                        style={{ height: "250px" }}
+                      />
+
                       <div className="mask">
                         <div className="d-flex justify-content-start align-items-end h-100">
                           <h5>
@@ -190,20 +237,20 @@ export default function Products() {
                           }}
                         ></div>
                       </div>
-                    
-                  </MDBRipple>
-                  <MDBCardBody>
-                    
+                    </MDBRipple>
+                    <MDBCardBody>
                       <h5 className="card-title mb-3">{product.title}</h5>
-                   
-                    <h6 className="mb-3">${product.price}</h6>
-                  </MDBCardBody>
-                </MDBCard>
+
+                      <h6 className="mb-3">${product.price}</h6>
+                    </MDBCardBody>
+                  </MDBCard>
                 </Link>
               </MDBCol>
             ))}
           </MDBRow>
         </MDBContainer>
+      ) : filteredProducts !== undefined && filteredProducts.length === 0 ? (
+        <h5 className="mt-5">No products found.</h5>
       ) : (
         <Spinner />
       )}

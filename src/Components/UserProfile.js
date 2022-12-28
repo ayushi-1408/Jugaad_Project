@@ -1,5 +1,12 @@
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { arrayRemove, arrayUnion, doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
+import {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  getDoc,
+  serverTimestamp,
+  updateDoc,
+} from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { useContext } from "react";
 import { Button, Card } from "react-bootstrap";
@@ -19,7 +26,6 @@ import {
   MDBRipple,
 } from "mdb-react-ui-kit";
 import {
-
   MDBModal,
   MDBModalDialog,
   MDBModalContent,
@@ -27,7 +33,7 @@ import {
   MDBModalTitle,
   MDBModalBody,
   MDBModalFooter,
-} from 'mdb-react-ui-kit';
+} from "mdb-react-ui-kit";
 import Spinner from "./Spinner";
 
 export default function UserProfile(props) {
@@ -51,7 +57,7 @@ export default function UserProfile(props) {
   const [wishList, setWishList] = useState();
   const [savedEvents, setSavedEvents] = useState();
 
-  const [connect, setConnect ] = useState();
+  const [connect, setConnect] = useState();
 
   const auth = getAuth();
 
@@ -77,15 +83,26 @@ export default function UserProfile(props) {
     const getProfile = async () => {
       if (user.uid === id) {
         setViewUserProfile({ ...user });
-        setConnect("none")
+        setConnect("none");
       } else {
         const userRef = doc(db, "Users", id);
         const dataa = await getDoc(userRef);
         setViewUserProfile({ ...dataa.data() });
-        if(user.requestsMade &&  user.requestsMade.includes(id)) setConnect("sent")
-        else if(user.requestsReceived && user.requestsReceived.includes(id)) setConnect("received")
-        else if(user.connected && user.connected.includes(id)) setConnect("connected")
-        else setConnect("connect")
+        console.log(user.connected);
+        if (user.requestsMade && user.requestsMade.includes(id))
+          setConnect("sent");
+        else if (user.requestsReceived && user.requestsReceived.includes(id))
+          setConnect("received");
+        else if (
+          user.connected &&
+          user.connected.some((element) => {
+            if (element.UID === id && element.name === dataa.data().name)
+              return true;
+            else return false;
+          })
+        )
+          setConnect("connected");
+        else setConnect("connect");
       }
     };
 
@@ -211,8 +228,6 @@ export default function UserProfile(props) {
     }
   }, [viewUserProfile]);
 
-
-
   // connection handlers
 
   const handleAcceptRequest = (e) => {
@@ -220,13 +235,19 @@ export default function UserProfile(props) {
     const getUser = async () => {
       updateDoc(doc(db, "Users", user.uid), {
         requestsReceived: arrayRemove(id),
-        connected: arrayUnion(id),
+        connected: arrayUnion({
+          UID: id,
+          name: viewUserProfile.name,
+        }),
       });
       updateDoc(doc(db, "Users", id), {
         requestsMade: arrayRemove(user.uid),
-        connected: arrayUnion(user.uid),
+        connected: arrayUnion({
+          UID: user.uid,
+          name: user.name,
+        }),
       });
-      setConnect("connected")
+      setConnect("connected");
     };
     getUser();
   };
@@ -240,7 +261,7 @@ export default function UserProfile(props) {
       updateDoc(doc(db, "Users", id), {
         requestsMade: arrayRemove(user.uid),
       });
-      setConnect("connect")
+      setConnect("connect");
     };
     getUser();
   };
@@ -254,7 +275,7 @@ export default function UserProfile(props) {
       updateDoc(doc(db, "Users", id), {
         requestsReceived: arrayUnion(user.uid),
       });
-      setConnect("sent")
+      setConnect("sent");
     };
     getUser();
   };
@@ -268,7 +289,7 @@ export default function UserProfile(props) {
       updateDoc(doc(db, "Users", id), {
         requestsReceived: arrayRemove(user.uid),
       });
-      setConnect("connect")
+      setConnect("connect");
     };
     getUser();
   };
@@ -280,23 +301,55 @@ export default function UserProfile(props) {
           className="gradient-custom-2"
           style={{ backgroundColor: "#9de2ff" }}
         >
-          <MDBContainer className="py-5 h-100">
+          <div style={{ paddingTop: "5px" }}>
+            {user.uid !== id ? (
+              connect === "sent" ? (
+                <Button variant="light" onClick={handleUnsendRequest}>
+                  Unsend Request
+                </Button>
+              ) : connect === "received" ? (
+                <>
+                  <Button variant="primary" onClick={handleAcceptRequest}>
+                    AcceptRequest
+                  </Button>
+                  <Button variant="danger" onClick={handleDeleteRequest}>
+                    Delete Request
+                  </Button>
+                </>
+              ) : connect === "connect" ? (
+                <Button variant="primary" className="mr-1" onClick={handleSendRequest}>
+                  Send Request
+                </Button>
+              ) : connect === "connected" ? (
+                <Button variant="light" disabled>
+                  Connected
+                </Button>
+              ) : (
+                <></>
+              )
+            ) : (
+              <></>
+            )}
+          </div>
+
+          <MDBContainer className="py-2 h-100">
             <MDBRow className="justify-content-center align-items-center h-100">
               <MDBCol lg="9" xl="7">
-              
                 <MDBCard>
-                  
                   <div
                     className="rounded-top text-white d-flex flex-row"
                     style={{ backgroundColor: "#000", height: "200px" }}
                   >
-                    
                     <div
                       className="ms-4 mt-5 d-flex flex-column"
                       style={{ width: "150px" }}
                     >
                       <MDBCardImage
-                        src={viewUserProfile.image !== undefined ? viewUserProfile.image : require('../default_image.webp')}
+                        src={
+                          viewUserProfile.image !== undefined
+                            ? viewUserProfile.image
+                            : require("../default_image.webp")
+                        }
                         alt="Generic placeholder image"
                         className="mt-4 mb-2 img-thumbnail"
                         fluid
@@ -314,68 +367,85 @@ export default function UserProfile(props) {
                       <MDBTypography tag="h5">
                         {viewUserProfile.name}
                       </MDBTypography>
-                  
                     </div>
                   </div>
                   <div
                     className="p-4 text-black"
                     style={{ backgroundColor: "#f8f9fa" }}
                   >
-                    <div className="d-flex justify-content-end text-center py-1">
-                    <div className="px-3">
-                        <MDBCardText className="mb-1 h5" role='button' onClick={() => setScrollableModal(!scrollableModal) } >1026</MDBCardText>
-                        <MDBCardText className="small text-muted mb-0" role='button' onClick={() => setScrollableModal(!scrollableModal)}>
-                          Followers
+                    <div className="d-flex justify-content-end text-center py-1 mx-5">
+                      <div className="px-3">
+                        <MDBCardText
+                          className="mb-1 h5"
+                          role="button"
+                          onClick={() => setScrollableModal(!scrollableModal)}
+                        >
+                          {viewUserProfile.connected.length}
+                        </MDBCardText>
+                        <MDBCardText
+                          className="small text-muted mb-0"
+                          role="button"
+                          onClick={() => setScrollableModal(!scrollableModal)}
+                        >
+                          Connections
                         </MDBCardText>
                       </div>
-      <MDBModal show={scrollableModal} setShow={setScrollableModal} tabIndex='-1'>
-        <MDBModalDialog scrollable>
-          <MDBModalContent>
-            <MDBModalHeader>
-              <MDBModalTitle>Modal title</MDBModalTitle>
-              <MDBBtn
-                className='btn-close'
-                color='none'
-                onClick={() => setScrollableModal(!scrollableModal)}
-              ></MDBBtn>
-            </MDBModalHeader>
-            <MDBModalBody>
-              <p>
-                Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in,
-                egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
-                
-             </p>
-             <p>
-                Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in,
-                egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
-             </p>
-             <p>
-                Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in,
-                egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
-             </p>
-             <p>
-                Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in,
-                egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.
-             </p>
-            </MDBModalBody>
-            <MDBModalFooter>
-              <MDBBtn color='secondary' onClick={() => setScrollableModal(!setScrollableModal)}>
-                Close
-              </MDBBtn>
-              <MDBBtn>Save changes</MDBBtn>
-            </MDBModalFooter>
-          </MDBModalContent>
-        </MDBModalDialog>
-      </MDBModal>
-      
-    
-
-                      
-                     
+                      <MDBModal
+                        show={scrollableModal}
+                        setShow={setScrollableModal}
+                        tabIndex="-1"
+                      >
+                        <MDBModalDialog scrollable>
+                          <MDBModalContent>
+                            <MDBModalHeader>
+                              <MDBModalTitle>Connections</MDBModalTitle>
+                              <MDBBtn
+                                className="btn-close"
+                                color="none"
+                                onClick={() =>
+                                  setScrollableModal(!scrollableModal)
+                                }
+                              ></MDBBtn>
+                            </MDBModalHeader>
+                            <MDBModalBody>
+                              {viewUserProfile.connected !== undefined &&
+                              viewUserProfile.connected.length !== 0 ? (
+                                <div>
+                                  <h5>
+                                    {viewUserProfile.connected.length}{" "}
+                                    connections
+                                  </h5>
+                                  <hr className="mx-n3" />
+                                  {viewUserProfile.connected.length !== 0 ? (
+                                    viewUserProfile.connected.map(
+                                      (connection) => (
+                                        <>
+                                         <div onClick={e => {nav(`/userProfile/${connection.UID}/`); setScrollableModal(!scrollableModal)}}>
+                                          <Link style={{textDecoration:"none", color:"black", fontWeight:"bold"}} >{connection.name}</Link>
+                                          </div>
+                                        </>
+                                      )
+                                    )
+                                  ) : (
+                                    <></>
+                                  )}
+                                 
+                                </div>
+                              ) : (
+                                <div>No connections.</div>
+                              )}
+                            </MDBModalBody>
+                            <MDBModalFooter>
+                              <MDBBtn onClick={() =>
+                                  setScrollableModal(!scrollableModal)
+                                }>Close</MDBBtn>
+                            </MDBModalFooter>
+                          </MDBModalContent>
+                        </MDBModalDialog>
+                      </MDBModal>
                     </div>
                   </div>
                   <MDBCardBody className="text-black p-4">
-                    
                     <div className="mb-5">
                       <p className="lead fw-normal mb-1">About</p>
                       <div
@@ -389,47 +459,33 @@ export default function UserProfile(props) {
                     <MDBCardText className="font-italic mb-0">Photographer</MDBCardText> */}
                       </div>
                     </div>
-                    <MDBBtn className='me-1' color='success' >
-                    Add New Product
-      </MDBBtn>
-      
-      <MDBBtn className='me-1' color='warning'>
-      Add new Blog
-      </MDBBtn>
-      
-      <MDBBtn color='info'>
-      Add new Event
-      </MDBBtn>
-      <MDBBtn className='me-1 ms-1' span color='danger'>
-      My Orders
-      </MDBBtn>
-                    {/* <Link
-                to="/addProduct"
-                style={{
-                  textDecoration: "none",
-                  role:"button",
-                  marginRight: "15px",
-                }}
-              >Add New Product</Link>
-              // <Link
-              //   to="/addBlog"
-              //   style={{
-              //     textDecoration: "none",
-                  
-              //     marginRight: "15px",
-              //   }}
-              // >Add new Blog</Link>
-              <Link
-                to="/addEvent"
-                style={{
-                  textDecoration: "none",
-                  
-                  marginRight: "15px",
-                }}
-              >Add New Event</Link> */}
-                    <div className="d-flex justify-content-between align-items-center mb-4">
+                    <MDBBtn
+                      className="me-1"
+                      color="success"
+                      onClick={(e) => nav("/addProduct")}
+                    >
+                      Add New Product
+                    </MDBBtn>
+
+                    <MDBBtn
+                      className="me-1"
+                      color="warning"
+                      onClick={(e) => nav("/addBlog")}
+                    >
+                      Add new Blog
+                    </MDBBtn>
+
+                    <MDBBtn color="info" onClick={(e) => nav("/addEvent")}>
+                      Add new Event
+                    </MDBBtn>
+
+                    <MDBBtn className="me-1 ms-1" span color="danger">
+                      My Orders
+                    </MDBBtn>
+
+                    <div className="d-flex justify-content-between align-items-center my-4">
                       <MDBCardText className="lead fw-normal mt-3">
-                        Recent Blogs
+                        <strong>My Blogs</strong>
                       </MDBCardText>
                       <MDBCardText className="mb-0">
                         <a href="#!" className="text-muted">
@@ -469,178 +525,201 @@ export default function UserProfile(props) {
                         />
                       </MDBCol>
                     </MDBRow>
+                    {myProducts !== undefined && myProducts.length !== 0 ? (
+                      <MDBContainer fluid className="my-5 text-center">
+                        <h4>
+                          {id === user.uid ? (
+                            <div className="d-flex justify-content-between align-items-center">
+                              <MDBCardText className="lead fw-normal mt-3">
+                                <h4>
+                                  <strong>My Products</strong>
+                                </h4>
+                              </MDBCardText>
+                              <MDBCardText className="mb-0">
+                                <a href="#!" className="text-muted">
+                                  <h6>Show all</h6>
+                                </a>
+                              </MDBCardText>
+                            </div>
+                          ) : (
+                            <div className="d-flex justify-content-between align-items-center">
+                              <MDBCardText className="lead fw-normal mt-3">
+                                <h4>
+                                  <strong>
+                                    {viewUserProfile.name}'s Products
+                                  </strong>
+                                </h4>
+                              </MDBCardText>
+                              <MDBCardText className="mb-0">
+                                <a href="#!" className="text-muted">
+                                  <h6>Show all</h6>
+                                </a>
+                              </MDBCardText>
+                            </div>
+                          )}
+                        </h4>
+
+                        {/* /////////////////////////////////// */}
+                        <MDBRow class="d-flex justify-content-center flex-wrap">
+                          {myProducts.slice(0, 4).map((product) => (
+                            <MDBCol
+                              lg="6"
+                              xl="6"
+                              className="mb-1"
+                              key={product.pid}
+                            >
+                              <MDBCard>
+                                <MDBRipple
+                                  className="bg-image"
+                                  rippleTag="div"
+                                  rippleColor="light"
+                                >
+                                  <img
+                                    fluid
+                                    src={
+                                      product.MediaID !== undefined &&
+                                      product.MediaID.length !== 0
+                                        ? product.MediaID[0]
+                                        : require("../default_image.webp")
+                                    }
+                                    style={{ width: "350px", height: "200px" }}
+                                  />
+                                  <a href="#!">
+                                    <div
+                                      className="mask"
+                                      style={{
+                                        backgroundColor: "rgba(0, 0, 0, 0.4)",
+                                      }}
+                                    >
+                                      <div className="d-flex justify-content-center align-items-center h-100">
+                                        <p className="text-white mb-0">
+                                          <strong>{product.title}</strong>
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="hover-overlay">
+                                      <div
+                                        className="mask"
+                                        style={{
+                                          backgroundColor:
+                                            "rgba(251, 251, 251, 0.2)",
+                                        }}
+                                      ></div>
+                                    </div>
+                                  </a>
+
+                                  <Link to={`/viewProduct/${product.pid}`}>
+                                    <div className="hover-overlay">
+                                      <div
+                                        className="mask"
+                                        style={{
+                                          backgroundColor:
+                                            "rgba(251, 251, 251, 0.15)",
+                                        }}
+                                      ></div>
+                                    </div>
+                                  </Link>
+                                </MDBRipple>
+                              </MDBCard>
+                            </MDBCol>
+                          ))}
+                        </MDBRow>
+                      </MDBContainer>
+                    ) : (
+                      <></>
+                    )}
+
+                    {user.uid === id &&
+                    wishList !== undefined &&
+                    wishList.length !== 0 ? (
+                      <MDBContainer fluid className="my-5 text-center">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <MDBCardText className="lead fw-normal mt-3">
+                            <h4>
+                              <strong>My WishList</strong>
+                            </h4>
+                          </MDBCardText>
+                          <MDBCardText className="mb-0">
+                            <a href="#!" className="text-muted">
+                              <h6>Show all</h6>
+                            </a>
+                          </MDBCardText>
+                        </div>
+
+                        {/* /////////////////////////////////// */}
+                        <MDBRow class="d-flex justify-content-center flex-wrap">
+                          {wishList.slice(0, 4).map((product) => (
+                            <MDBCol
+                              lg="6"
+                              xl="6"
+                              className="mb-1"
+                              key={product.pid}
+                            >
+                              <MDBCard>
+                                <MDBRipple
+                                  className="bg-image"
+                                  rippleTag="div"
+                                  rippleColor="light"
+                                >
+                                  <img
+                                    fluid
+                                    src={
+                                      product.MediaID !== undefined &&
+                                      product.MediaID.length !== 0
+                                        ? product.MediaID[0]
+                                        : require("../default_image.webp")
+                                    }
+                                    style={{ width: "320px", height: "200px" }}
+                                  />
+                                  <a href="#!">
+                                    <div
+                                      className="mask"
+                                      style={{
+                                        backgroundColor: "rgba(0, 0, 0, 0.4)",
+                                      }}
+                                    >
+                                      <div className="d-flex justify-content-center align-items-center h-100">
+                                        <p className="text-white mb-0">
+                                          <strong>{product.title}</strong>
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="hover-overlay">
+                                      <div
+                                        className="mask"
+                                        style={{
+                                          backgroundColor:
+                                            "rgba(251, 251, 251, 0.2)",
+                                        }}
+                                      ></div>
+                                    </div>
+                                  </a>
+
+                                  <Link to={`/viewProduct/${product.pid}`}>
+                                    <div className="hover-overlay">
+                                      <div
+                                        className="mask"
+                                        style={{
+                                          backgroundColor:
+                                            "rgba(251, 251, 251, 0.15)",
+                                        }}
+                                      ></div>
+                                    </div>
+                                  </Link>
+                                </MDBRipple>
+                              </MDBCard>
+                            </MDBCol>
+                          ))}
+                        </MDBRow>
+                      </MDBContainer>
+                    ) : (
+                      <></>
+                    )}
                   </MDBCardBody>
                 </MDBCard>
               </MDBCol>
             </MDBRow>
           </MDBContainer>
-
-          {myProducts !== undefined && myProducts.length !== 0 ? (
-            <MDBContainer fluid className="my-5 text-center">
-              <h4 className="mt-4 mb-5">
-                {id === user.uid ? (
-                  <strong> My Products</strong>
-                ) : (
-                  <strong> {viewUserProfile.name}'s Products</strong>
-                )}
-              </h4>
-              
-
-    {/* /////////////////////////////////// */}
-              <MDBRow>
-                {myProducts.map((product) => (
-                  <MDBCol md="12" lg="3" className="mb-4" key={product.pid}>
-                    <MDBCard>
-                    <MDBRipple className='bg-image' rippleTag='div' rippleColor='light'>
-      <img src={product.image} className='w-100' />
-      <a href='#!'>
-        <div className='mask' style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)' }}>
-          <div className='d-flex justify-content-center align-items-center h-100'>
-            <p className='text-white mb-0'>{product.title}</p>
-          </div>
-        </div>
-        <div className='hover-overlay'>
-          <div className='mask' style={{ backgroundColor: 'rgba(251, 251, 251, 0.2)' }}></div>
-        </div>
-      </a>
-    
-                        
-                        <Link to={`/viewProduct/${product.pid}`}>
-                          <div className="mask">
-                            <div className="d-flex justify-content-start align-items-end h-100">
-                              <h5>
-                                <span className="badge bg-primary ms-2">
-                                  New
-                                </span>
-                              </h5>
-                            </div>
-                          </div>
-                          <div className="hover-overlay">
-                            <div
-                              className="mask"
-                              style={{
-                                backgroundColor: "rgba(251, 251, 251, 0.15)",
-                              }}
-                            ></div>
-                          </div>
-                        </Link>
-                      </MDBRipple>
-                      <MDBCardBody>
-                        <Link
-                          to={`/viewProduct/${product.pid}`}
-                          className="text-reset"
-                        >
-                          <h5 className="card-title mb-3"></h5>
-                        </Link>
-                        <Link
-                          to={`/viewProduct/${product.pid}`}
-                          className="text-reset"
-                        >
-                          <p>Category</p>
-                        </Link>
-                        <h6 className="mb-3">${product.price}</h6>
-                      </MDBCardBody>
-                    </MDBCard>
-                  </MDBCol>
-                ))}
-              </MDBRow>
-            </MDBContainer>
-          ) : (
-            <></>
-          )}
-
-          { user.uid === id && wishList !== undefined && wishList.length !== 0 ? (
-            <MDBContainer fluid className="my-5 text-center">
-              <h4 className="mt-4 mb-3">
-                <strong> My Wishlist</strong> : <></>
-              </h4>
-
-              <MDBRow>
-                {wishList.map((product) => (
-                  <MDBCol md="12" lg="4" className="mb-4" key={product.pid}>
-                    <MDBCard>
-                      <MDBRipple
-                        rippleColor="light"
-                        rippleTag="div"
-                        className="bg-image rounded hover-zoom"
-                      >
-                        <MDBCardImage
-                          src={product.image}
-                          fluid
-                          className="w-100"
-                        />
-                        <Link to={`/viewProduct/${product.pid}`}>
-                          <div className="mask">
-                            <div className="d-flex justify-content-start align-items-end h-100">
-                              <h5>
-                                <span className="badge bg-primary ms-2">
-                                  New
-                                </span>
-                              </h5>
-                            </div>
-                          </div>
-                          <div className="hover-overlay">
-                            <div
-                              className="mask"
-                              style={{
-                                backgroundColor: "rgba(251, 251, 251, 0.15)",
-                              }}
-                            ></div>
-                          </div>
-                        </Link>
-                      </MDBRipple>
-                      <MDBCardBody>
-                        <Link
-                          to={`/viewProduct/${product.pid}`}
-                          className="text-reset"
-                        >
-                          <h5 className="card-title mb-3">{product.title}</h5>
-                        </Link>
-                        <Link
-                          to={`/viewProduct/${product.pid}`}
-                          className="text-reset"
-                        >
-                          <p>Category</p>
-                        </Link>
-                        <h6 className="mb-3">${product.price}</h6>
-                      </MDBCardBody>
-                    </MDBCard>
-                  </MDBCol>
-                ))}
-              </MDBRow>
-            </MDBContainer>
-          ) : (
-            <></>
-          )}
-          
-          {user.uid !== id ? (
-            connect === "sent" ? (
-              <Button variant="light" onClick={handleUnsendRequest}>
-                Unsend Request
-              </Button>
-            ) : connect === "received" ? (
-              <>
-                <Button variant="primary" onClick={handleAcceptRequest}>
-                  AcceptRequest
-                </Button>
-                <Button variant="danger" onClick={handleDeleteRequest}>
-                  Delete Request
-                </Button>
-              </>
-            ) :  connect === "connect" ? ( 
-              <Button variant="primary" onClick={handleSendRequest}>
-                Send Request
-              </Button>
-            ) : connect === "connected" ? (
-              <Button variant="light" disabled >
-                Connected
-              </Button>
-            ) : (
-              <></>
-            )
-          ) : (
-            <></>
-          )}
         </div>
       ) : (
         <Spinner />

@@ -34,10 +34,10 @@ function Navigationbar() {
     <div>
       <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark"   position="relative" className="route-outlet" >
         <Container>
-          <Navbar.Brand href="/">JUGAAD</Navbar.Brand>
+          <Navbar.Brand className="" href="/">JUGAAD</Navbar.Brand>
           <Navbar.Toggle aria-controls="responsive-navbar-nav" />
           <Navbar.Collapse id="responsive-navbar-nav">
-            <Nav className="me-auto">
+            <Nav className="me-auto ms-1">
               <Link to="/" style={{ textDecoration: "none", color: "white", marginRight: '15px' }}>
                 Home 
               </Link>
@@ -81,9 +81,10 @@ function Navigationbar() {
                    to ={`/userProfile/${user.uid}/`}
                   // onClick={() => nav(`/userProfile/${user.uid}`)}
                   // reloadDocument="true"
-                    style={{ textDecoration: "none", color: "white" }}
+                    style={{ textDecoration: "none", color: "white", marginRight:"10px" }}
                   >
-                    {user.name}
+                    <div class="circle-singleline"><strong>{user.name.charAt(0)}</strong></div> 
+                    
                   </Link>
 
                   <Button variant="danger" onClick={handleLogout} >

@@ -154,6 +154,7 @@ function ViewFullProduct(props) {
                   src={ require('../default_image.webp') }
                   //style={{ maxWidth: "100px", maxHeight: "100px" }}
                   className="w-100"
+                  style={{objectFit:"contain", width:"200px", height:"300px"}}
                 />
               )
             }
