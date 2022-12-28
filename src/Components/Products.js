@@ -138,8 +138,8 @@ export default function Products() {
     <>
       {/* search bar */}
 
-      <div>
-        <div className=" md-5 d-flex justify-content-center mt-3 me-5 ">
+      <div className="gradient-custom-2" style={{ backgroundColor: "#9de2ff" }}>
+        <div className=" md-5 d-flex justify-content-center mt-3 me-5 mb-2 ">
           <div className="d-flex align-self-center">
             <div>
               <input
@@ -176,7 +176,7 @@ export default function Products() {
             </div>
 
             {searchedItem !== undefined && searchedItem !== "" ? (
-              <div className="m-2 d-flex align-self-start align-items-center">
+              <div className="m-2 d-flex align-self-start align-items-center gradient-custom-2" style={{ backgroundColor: "#9de2ff" }}>
                 <div>
                   <Icon icon={x} onClick={(e) => clearSearch()} />
                 </div>
@@ -191,8 +191,8 @@ export default function Products() {
       {filteredProducts !== undefined && filteredProducts.length !== 0 ? (
         <MDBContainer
           fluid
-          className="my-5 text-center"
-          style={{ alignContent: "center" }}
+          className=" text-center gradient-custom-2"
+          style={{ alignContent: "center", backgroundColor: "#9de2ff" }}
         >
           <MDBRow style={{ alignSelf: "center" }}>
             {filteredProducts.map((product) => (

@@ -8,7 +8,18 @@ import UserContext from '../Contexts/UserContext';
 import { Link, redirect, useNavigate } from 'react-router-dom';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import EventsContext from '../Contexts/EventsContext';
-
+import {
+  MDBCol,
+  MDBContainer,
+  MDBRow,
+  MDBCard,
+  MDBCardText,
+  MDBCardBody,
+  MDBCardImage,
+  MDBBtn,
+  MDBTypography,
+  MDBRipple,
+} from "mdb-react-ui-kit";
 
 function AddEvent() {
     const [newEvent,setNewEvent] = useState({
@@ -80,6 +91,12 @@ function AddEvent() {
 
   return (
     <div>
+      <MDBContainer className="py-2 h-100 bg-success">
+            <MDBRow className="justify-content-center align-items-center h-100">
+              <MDBCol lg="9" xl="7">
+                <h3>ADD AN EVENT</h3>
+                <MDBCard className="mt-4 border-0  mb-4">
+                  <MDBCardBody>
       <Form>
       <Form.Group className="mb-3" controlId="title">
         <Form.Label>Title</Form.Label>
@@ -105,6 +122,12 @@ function AddEvent() {
         Submit
       </Button>
     </Form>
+    </MDBCardBody>
+    </MDBCard>
+    </MDBCol>
+    </MDBRow>
+    </MDBContainer>
+    
     </div>
   )
 }

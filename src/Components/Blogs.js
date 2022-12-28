@@ -58,9 +58,13 @@ export default function Blogs() {
 
   return (
     <>
+    <div
+          className="gradient-custom-2"
+          style={{ backgroundColor: "#9de2ff" }}
+        >
     {
       blogs !== undefined ? (
-        <MDBRow className='row-cols-1 row-cols-md-3 g-4 mt-5 mb-5'>
+        <MDBRow className='row-cols-1 row-cols-md-3 g-4 mt-3 mb-3 gradient-custom-2' style={{ backgroundColor: "#9de2ff" }}>
         {blogs.map((blog) => (
           <MDBCol key={blog.id}>
           <MDBCard className='h-100'>
@@ -91,7 +95,7 @@ export default function Blogs() {
       )
     }
     
-  
+    </div>
     </>
   )
 }

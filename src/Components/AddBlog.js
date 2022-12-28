@@ -85,7 +85,8 @@ function AddBlog() {
      
 
   return (
-    <Container className="mt-4">
+    <div className="bg-success ">
+    <Container className="mt-4  ">
       
 
       <Row className="my-4">
@@ -95,13 +96,13 @@ function AddBlog() {
             offset: 1,
           }}
         >
-          <h3>Write your Jugaad</h3>
+          <h2 className='mt-4'>Write your Jugaad</h2>
 
         
 
-          <Card className="mt-4 border-0">
+          <Card className="mt-4 border-0  mb-4">
             <CardBody>
-            <Input type="text" placeholder="title" onChange={handleInput} />
+            <Input type="text" className="mb-3 "placeholder="title" onChange={handleInput} />
               <Input type="textarea" placeholder="description" onChange={handleInput} />
 
               <Button onClick={handleSubmit} className="mt-2" color="primary">
@@ -112,6 +113,7 @@ function AddBlog() {
         </Col>
       </Row>
     </Container>
+    </div>
   )
 }
 
