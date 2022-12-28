@@ -9,6 +9,8 @@ import { db } from "../firebase-config";
 import { collection, getDocs, doc, getDoc, Query } from "firebase/firestore";
 import { Icon } from 'react-icons-kit'
 import {search} from 'react-icons-kit/icomoon/search'
+
+
 import {
   MDBContainer,
   MDBRow,
@@ -121,16 +123,19 @@ export default function Products() {
   }
 
   return (
-    <>
+    < >
 
     {/* search bar */}
-    <MDBRow>
-    <MDBCol md="6">
-      <input className="form-control" type="text" placeholder="Search" aria-label="Search" value={searchedItem} onChange={e => setSearch(e.target.value)} />
+  
+    <MDBCol md="6" >
+      <input className=" mx-5 form-control  hoverable mt-3" type="text" placeholder="Search" aria-label="Search" value={searchedItem} onChange={e => setSearch(e.target.value)} ></input>
+      
+      <Button onClick={clearSearch} className='mt-2'>
       <Icon icon={search} onClick={findProducts} />
-      <Button onClick={clearSearch}>Clear search</Button>
+      Clear search</Button>
+      
     </MDBCol>
-    </MDBRow>
+    
     <MDBRow>
     <MDBCol>
       {
