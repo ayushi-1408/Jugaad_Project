@@ -11,6 +11,17 @@ import UserContext from '../Contexts/UserContext';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Spinner from './Spinner';
 import EventsContext from '../Contexts/EventsContext';
+import {
+  MDBRow,
+  MDBCol,
+  MDBCard,
+  MDBCardBody,
+  MDBCardTitle,
+  MDBCardText,
+  MDBCardHeader,
+  MDBCardFooter,
+  MDBBtn
+} from 'mdb-react-ui-kit';
 
 export default function Events() {
   const {events,setEvents} = useContext(EventsContext)
@@ -47,7 +58,7 @@ export default function Events() {
 
   return (
     <>
-    {
+    {/* {
       events !== undefined ? (
         <div >
     <Row xs={1} md={2} className="g-4">
@@ -78,7 +89,32 @@ export default function Events() {
       ) : (
         <Spinner/>
       )
-    }
+    } */}
+    <MDBRow className=' row-cols-1 row-cols-md-3 g-4 mt-3 gradient-custom mb-3'>
+      <MDBCol >
+     <MDBCard  >
+      <MDBCardHeader>Featured</MDBCardHeader>
+      <MDBCardBody>
+        <MDBCardTitle>Special title treatment</MDBCardTitle>
+        <MDBCardText>With supporting text below as a natural lead-in to additional content.</MDBCardText>
+        <MDBBtn href='#'>Button</MDBBtn>
+      </MDBCardBody>
+      <MDBCardFooter className='text-muted'>2 days ago</MDBCardFooter>
+    </MDBCard>
+</MDBCol>
+
+<MDBCol>
+    <MDBCard >
+      <MDBCardHeader>Featured</MDBCardHeader>
+      <MDBCardBody>
+        <MDBCardTitle>Special title treatment</MDBCardTitle>
+        <MDBCardText>With supporting text below as a natural lead-in to additional content.</MDBCardText>
+        <MDBBtn href='#'>Button</MDBBtn>
+      </MDBCardBody>
+      <MDBCardFooter className='text-muted'>2 days ago</MDBCardFooter>
+    </MDBCard>
+ </MDBCol>
+</MDBRow>
     </>
     
   )
