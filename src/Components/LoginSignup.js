@@ -24,7 +24,7 @@ export default function LoginSignup() {
     connected:[],
     requestsReceived:[],
     requestsMade:[],
-    image:undefined,
+    image:"",
     dob:"",
     email:"",
     mobile:undefined,
@@ -166,7 +166,7 @@ export default function LoginSignup() {
   return (
     <>
 
-    <MDBContainer fluid className="p-3 my-5 h-custom" style={{  width:' 100%',
+    <MDBContainer fluid className="p-3  h-custom" style={{  width:' 100%',
   height: '100%', background: 'linear-gradient(to right, rgba(102, 126, 234, 0.5), rgba(118, 75, 162, 0.5))' , backgroundSize:'cover'}}>
 
       <MDBRow>
@@ -196,10 +196,10 @@ export default function LoginSignup() {
           <MDBInput wrapperClass='mb-4' label='Email address' name="email" id='formControlLg' type='email' size="lg" onChange={handleInput} value={loginUser.email}/>
           <MDBInput wrapperClass='mb-4' label='Password' name="password" id='formControlLg' type='password' size="lg" onChange={handleInput} value={loginUser.password}/>
 
-          <div className="d-flex justify-content-between mb-4">
+          {/* <div className="d-flex justify-content-between mb-4">
             <MDBCheckbox name='flexCheck' value='' id='flexCheckDefault' label='Remember me' />
             <a href="!#">Forgot password?</a>
-          </div>
+          </div> */}
 
           <div className='text-center text-md-start mt-4 pt-2'>
             <MDBBtn className="mb-0 px-5" size='lg' onClick={handleLogin}>Login</MDBBtn>

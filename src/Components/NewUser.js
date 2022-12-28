@@ -1,13 +1,14 @@
-import { collection, doc } from "firebase/firestore";
+import { arrayUnion, collection, doc, updateDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-import { db } from "../firebase-config";
+import { db, storage } from "../firebase-config";
 import { addDoc, getDocs, setDoc } from "firebase/firestore";
 import {
   getAuth,
   createUserWithEmailAndPassword,
   sendEmailVerification,
+  signOut,
 } from "firebase/auth";
 import userEvent from "@testing-library/user-event";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +19,10 @@ import {
   MDBCardBody,
   MDBInput,
   MDBCheckbox,
+  MDBFile,
 } from "mdb-react-ui-kit";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import  Spinner  from "./Spinner";
 
 function NewUser() {
   const [newUser, setNewUser] = useState({
@@ -30,10 +34,8 @@ function NewUser() {
     connected: [],
     requestsReceived: [],
     requestsMade: [],
-    image:undefined,
-    dob: "",
+    image: "",
     email: "",
-    mobile: undefined,
     OID: [],
     BID: [],
     Cart: [],
@@ -45,34 +47,71 @@ function NewUser() {
     additionalInfo: {},
   });
 
+  const [media, setMedia] = useState();
+
+  const[spinner,setSpinner] = useState(false);
+
   const navigate = useNavigate();
 
   const handleInput = (e) => {
     const name = e.target.name;
     const value = e.target.value;
-
-    setNewUser({ ...newUser, [name]: value });
+    if (name === "image") setMedia(e.target.files[0]);
+    else setNewUser({ ...newUser, [name]: value });
   };
+
+  const auth = getAuth();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(newUser);
-
-    const auth = getAuth();
+    setSpinner(true);
     createUserWithEmailAndPassword(auth, newUser.email, newUser.password)
       .then((userCredential) => {
         // Signed in
         const user = userCredential.user;
-        console.log(user);
-        console.log(auth.currentUser);
+        signOut(auth).then(() => {
+          console.log(auth.currentUser);
+        });
+
         sendEmailVerification(auth.currentUser)
           .then(() => {
-            console.log(auth.currentUser);
-            const userCollectionRef = doc(db, "Users", user.uid);
             const addUser = async () => {
-              const ref = await setDoc(userCollectionRef, newUser);
-              alert("Verify email");
-              navigate("/login");
+              const data = await setDoc(doc(db, "Users", user.uid), newUser);
+              const imageRef = ref(storage, `images/${user.uid}`);
+              await uploadBytes(imageRef, media).then((snapshot) => {
+                getDownloadURL(snapshot.ref).then((url) => {
+                  console.log(url);
+                  updateDoc(doc(db, "Users", user.uid), {
+                    image: url,
+                  });
+                });
+              });
+              setNewUser({
+                name: "",
+                password: "",
+                description: "",
+                dateOfPosting: new Date(),
+                address: "",
+                connected: [],
+                requestsReceived: [],
+                requestsMade: [],
+                image: "",
+                email: "",
+                OID: [],
+                BID: [],
+                Cart: [],
+                PID: [],
+                EID: [],
+                WishPID: [],
+                SavedBID: [],
+                SavedEID: [],
+                additionalInfo: {},
+              });
+              setSpinner(false);
+              alert("Verify email to Login");
+              navigate('/login');
+              console.log(auth.currentUser);
             };
 
             addUser();
@@ -91,46 +130,6 @@ function NewUser() {
   };
 
   return (
-    // <div>
-    //   <Form>
-    //   <Form.Group className="mb-3" controlId="name">
-    //     <Form.Label>Name</Form.Label>
-    //     <Form.Control type="name" placeholder="name" onChange={handleInput} value={newUser.name} />
-    //     <Form.Text className="text-muted">
-    //       We'll never share your data with anyone else.
-    //     </Form.Text>
-    //   </Form.Group>
-
-    //   <Form.Group className="mb-3" controlId="mobile">
-    //     <Form.Label>Phone No.</Form.Label>
-    //     <Form.Control type="number" placeholder="mobile" onChange={handleInput} value={newUser.mobile} />
-    //   </Form.Group>
-    //   <Form.Group className="mb-3" controlId="email">
-    //     <Form.Label>Email</Form.Label>
-    //     <Form.Control type="email" placeholder="email" onChange={handleInput} value={newUser.email}/>
-    //   </Form.Group>
-    //   <Form.Group className="mb-3" controlId="password">
-    //     <Form.Label>Password</Form.Label>
-    //     <Form.Control type="password" placeholder="password" onChange={handleInput} value={newUser.password}/>
-    //   </Form.Group>
-    //   <Form.Group className="mb-3" controlId="dob">
-    //     <Form.Label>Date of Birth</Form.Label>
-    //     <Form.Control type="date" placeholder="dob" onChange={handleInput} value={newUser.dob}/>
-    //   </Form.Group>
-    //   <Form.Group className="mb-3" controlId="address">
-    //     <Form.Label>Address</Form.Label>
-    //     <Form.Control type="text" placeholder="address" onChange={handleInput} value={newUser.address}/>
-    //   </Form.Group>
-    //   <Form.Group className="mb-3" controlId="description">
-    //     <Form.Label>Description</Form.Label>
-    //     <Form.Control type="text" placeholder="description" onChange={handleInput} value={newUser.description} />
-    //   </Form.Group>
-    //   <Button variant="primary" type="submit" onClick={handleSubmit}>
-    //     Submit
-    //   </Button>
-    // </Form>
-    // </div>
-
     <>
       <MDBContainer
         fluid
@@ -188,7 +187,7 @@ function NewUser() {
             />
             <MDBInput
               wrapperClass="mb-4"
-              label="Dob"
+              label="Date of Birth"
               size="lg"
               id="form5"
               type="date"
@@ -216,16 +215,35 @@ function NewUser() {
               onChange={handleInput}
               value={newUser.description}
             />
+            <MDBFile
+              size="md"
+              placeholder="Profile Picture"
+              onChange={handleInput}
+              id="customFile"
+              label="Profile Picture"
+              name="image"
+            />
             <div className="d-flex flex-row justify-content-center mb-4">
-              <MDBCheckbox
+              {/* <MDBCheckbox
                 name="flexCheck"
                 id="flexCheckDefault"
                 label="I agree all statements in Terms of service"
-              />
+              /> */}
             </div>
-            <MDBBtn className="mb-4 w-100 gradient-custom-4" size="lg" onClick={handleSubmit}>
-              Register
-            </MDBBtn>
+            {
+              spinner ? (
+                <Spinner/>
+              ) : (
+                <MDBBtn
+                className="mb-4 w-100 gradient-custom-4"
+                size="lg"
+                onClick={handleSubmit}
+              >
+                Register
+              </MDBBtn>
+              )
+            }
+           
           </MDBCardBody>
         </MDBCard>
       </MDBContainer>

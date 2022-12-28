@@ -51,6 +51,7 @@ import {
 } from "mdb-react-ui-kit";
 import Spinner from "./Spinner";
 import StripeCheckout from "react-stripe-checkout";
+import Navigationbar from "./Navigationbar";
 
 function Cart() {
   const { user, setUser } = useContext(UserContext);
@@ -200,6 +201,7 @@ function Cart() {
 
   return (
     <>
+    
       {cart !== undefined ? (
         <section className="h-100 gradient-custom">
           <MDBContainer className="py-5 h-100">

@@ -9,6 +9,7 @@ import {
 import { useContext } from 'react';
 import UserContext from '../Contexts/UserContext';
 import { db } from '../firebase-config';
+import Navigationbar from './Navigationbar';
 
 const a=function Component() {
 
@@ -23,6 +24,7 @@ const a=function Component() {
           const userRef = doc(db, "Users", userr.uid);
           const data = await getDoc(userRef);
           setUser({...data.data(),uid:userr.uid})
+          console.log(data.data())
         };
         getUser();
       } 
@@ -30,6 +32,7 @@ const a=function Component() {
   }
   return (
   <>
+  
     <MDBRipple rippleTag='div' className='bg-image hover-overlay hover-zoom hover-shadow'>
       <img src={ require('../b.png') } className='w-100' />
       <a href='#!'>

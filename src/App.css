@@ -1,4 +1,6 @@
-
+body {
+  padding-top: 56px;
+}
 .App {
   text-align: center;
 }

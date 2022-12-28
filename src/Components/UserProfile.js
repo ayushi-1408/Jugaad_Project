@@ -346,7 +346,7 @@ export default function UserProfile(props) {
                     >
                       <MDBCardImage
                         src={
-                          viewUserProfile.image !== undefined
+                          viewUserProfile.image !== undefined && viewUserProfile.image !== ""
                             ? viewUserProfile.image
                             : require("../default_image.webp")
                         }
