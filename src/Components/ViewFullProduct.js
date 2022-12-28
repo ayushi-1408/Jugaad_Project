@@ -133,9 +133,8 @@ function ViewFullProduct(props) {
 </MDBCol>
 </MDBRow>
 </MDBContainer>
-        <Card>
-          <div style={{ alignContent: "center", margin:"20px" }}>
-          <Carousel activeIndex={index} onSelect={handleSelect}>
+        <Card className="mx-3 my-2">
+          <Carousel className="w-50" style={{ alignSelf: "center", margin:"20px" }}  activeIndex={index} onSelect={handleSelect}>
             {
                product.MediaID !== undefined && product.MediaID.length !== 0 ? (
                 product.MediaID.map((element) => (
@@ -144,56 +143,33 @@ function ViewFullProduct(props) {
                         className="d-block w-100"
                         src={element}
                         alt="First slide"
+                        style={{objectFit:"contain", width:"300px", height:"400px"}}
                       />
                     </Carousel.Item>
                     ))
               ) : (
+
                 <Card.Img
                   variant="top"
-                  src={ require('../no_image.png') }
-                  style={{ maxWidth: "100px", maxHeight: "100px" }}
+                  src={ require('../default_image.webp') }
+                  //style={{ maxWidth: "100px", maxHeight: "100px" }}
+                  className="w-100"
                 />
               )
             }
-          
-               
-              
-      {/* <Carousel.Item>
-        <img
-          className="d-block w-100"
-          src="https://firebasestorage.googleapis.com/v0/b/jugaad-70ee9.appspot.com/o/images%2FScreenshot%20(5).png?alt=media&token=ab119342-b0d2-4d8a-b03d-eb489ee80d74"
-          alt="Second slide"
-        />
-
-        <Carousel.Caption>
-          <h3>Second slide label</h3>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-        </Carousel.Caption>
-      </Carousel.Item>
-      <Carousel.Item>
-        <img
-          className="d-block w-100"
-          src="https://firebasestorage.googleapis.com/v0/b/jugaad-70ee9.appspot.com/o/images%2FScreenshot%20(3).png?alt=media&token=7056914a-5746-4425-a218-0cd90753d581"
-          alt="Third slide"
-        />
-
-        <Carousel.Caption>
-          <h3>Third slide label</h3>
-          <p>
-            Praesent commodo cursus magna, vel scelerisque nisl consectetur.
-          </p>
-        </Carousel.Caption>
-      </Carousel.Item> */}
-     
+        
     </Carousel>
-          </div>
           
         </Card>
-        <br />
-        <Card className="mb-10">
+        
+        <Card className="mx-3 my-2">
           <Card.Body>
+            <Card.Title>Description</Card.Title>
             <Card.Text>{product.description}</Card.Text>
           </Card.Body>
+          </Card>
+
+        
           {
             addToCart === true ? (
               <>
@@ -207,7 +183,7 @@ function ViewFullProduct(props) {
             ) : (
               <>
                <div className=' mx-md-n5 mb-3' >
-                    <MDBBtn outline color="primary" size="sm"  disabled type="submit"  variant="light ">
+                    <MDBBtn outline color="primary" size="sm"  disabled type="submit"  variant="light " style={{border:"1px solid"}}>
                     <Icon  icon={ic_add_shopping_cart}/>
                     Added to Cart
                     </MDBBtn>
@@ -228,9 +204,10 @@ function ViewFullProduct(props) {
           </>
             ) : (
               <div className=' mx-md-n5 mb-3' >
-              <Button variant="danger " type="submit" onClick={removeWishList}>
+              <MDBBtn variant="light" size="sm" color="danger" type="submit"  onClick={removeWishList} style={{border:"1px solid"}}>
+              <Icon  icon={heart}/>
             Remove from WishList
-          </Button>
+          </MDBBtn>
           </div>
 
             )
@@ -241,13 +218,15 @@ function ViewFullProduct(props) {
           </Button>
           </Link>
           
-        </Card>
+       
       </div>
       ) : (
         <Spinner/>
       )
     }
+    <br/>
     </>
+
   );
 }
 

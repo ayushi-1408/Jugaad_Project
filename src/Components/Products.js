@@ -151,22 +151,25 @@ export default function Products() {
 
     
       {filteredProducts !== undefined && filteredProducts.length !== 0 ? (
-        <MDBContainer fluid className="my-5 text-center">
-          <h4 className="mt-4 mb-5">
+        <MDBContainer fluid className="my-5 text-center" style={{alignContent:"center"}}>
+          <h3 className="mt-4 mb-5">
             <strong>Our Products</strong>
-          </h4>
+          </h3>
 
-          <MDBRow>
+          <MDBRow style={{alignSelf:"center"}}>
             {filteredProducts.map((product) => (
-              <MDBCol md="12" lg="4" className="mb-4" key={product.id}>
-                <MDBCard>
+              <MDBCol className="my-2 col-md-4 col-lg-3 col-sm-12" key={product.id} >
+                <Link to={`/viewProduct/${product.id}`} style={{textDecoration:"none", color:"black"}}>
+                <MDBCard style={{maxWidth:"300px"}}>
                   <MDBRipple
                     rippleColor="light"
                     rippleTag="div"
                     className="bg-image rounded hover-zoom"
                   >
-                    <MDBCardImage src={product.image} fluid className="w-100" />
-                    <Link to={`/viewProduct/${product.id}`} >
+                    <MDBCardImage src={product.MediaID !== undefined && product.MediaID.length !== 0 ? product.MediaID[0] : require('../default_image.webp')} 
+                    fluid className="w-100"  style={{height:"250px", }}
+                    />
+                    
                       <div className="mask">
                         <div className="d-flex justify-content-start align-items-end h-100">
                           <h5>
@@ -182,26 +185,16 @@ export default function Products() {
                           }}
                         ></div>
                       </div>
-                    </Link>
+                    
                   </MDBRipple>
                   <MDBCardBody>
-                    <Link
-                      to={`/viewProduct/${product.id}`}
-                      className="text-reset"
-                      
-                    >
+                    
                       <h5 className="card-title mb-3">{product.title}</h5>
-                    </Link>
-                    <Link
-                      to={`/viewProduct/${product.id}`}
-                      className="text-reset"
-                      
-                    >
-                      <p>Category</p>
-                    </Link>
+                   
                     <h6 className="mb-3">${product.price}</h6>
                   </MDBCardBody>
                 </MDBCard>
+                </Link>
               </MDBCol>
             ))}
           </MDBRow>

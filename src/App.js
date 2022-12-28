@@ -22,16 +22,13 @@ import UserContext from "./Contexts/UserContext";
 import LoginSignup from "./Components/LoginSignup";
 import Cart from "./Components/Cart";
 import AddEvent from "./Components/AddEvent";
-import PlaceOrder from "./Components/PlaceOrder";
 import { useState } from "react";
 import AddBlog from "./Components/AddBlog";
 import FooterPart from "./Components/footer";
 import ProductContext from "./Contexts/ProductsContext";
 import BlogsContext from "./Contexts/BlogsContext";
 import EventsContext from "./Contexts/EventsContext";
-import OrderContext from "./Contexts/OrderContext";
 import ViewFullBlog from "./Components/ViewFullBlog";
-import CreateOrder from "./Components/CreateOrder";
 
 function App() {
   const [user, setUser] = useState();
@@ -54,7 +51,6 @@ function App() {
                     <Route path="events" element={<Events />} />
                     <Route path="addEvent" element={<AddEvent />} />
                     <Route path="addBlog" element={<AddBlog />} />
-                    <Route path="order" element={<CreateOrder />} />
                     <Route path="blogs" element={<Blogs />} />
                     <Route path="events" element={<Events />} />
                     <Route path="products" element={<Products />} />
@@ -64,7 +60,6 @@ function App() {
                     <Route path="viewBlog/:id" element={<ViewFullBlog />} />
                     <Route path="viewProduct/:id" element={<ViewFullProduct />} />
                     <Route path="cart" element={<Cart />} />
-                    <Route path="placeOrder" element={<PlaceOrder />} />
                   </Route>
                 </Routes>
                 <FooterPart />

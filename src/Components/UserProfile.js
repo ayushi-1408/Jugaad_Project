@@ -308,7 +308,7 @@ export default function UserProfile(props) {
                       style={{ width: "150px" }}
                     >
                       <MDBCardImage
-                        src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-profiles/avatar-1.webp"
+                        src={viewUserProfile.image !== undefined ? viewUserProfile.image : require('../default_image.webp')}
                         alt="Generic placeholder image"
                         className="mt-4 mb-2 img-thumbnail"
                         fluid
@@ -326,7 +326,7 @@ export default function UserProfile(props) {
                       <MDBTypography tag="h5">
                         {viewUserProfile.name}
                       </MDBTypography>
-                      <MDBCardText>Place</MDBCardText>
+                  
                     </div>
                   </div>
                   <div

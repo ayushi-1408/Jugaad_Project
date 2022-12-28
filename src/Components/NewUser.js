@@ -30,6 +30,7 @@ function NewUser() {
     connected: [],
     requestsReceived: [],
     requestsMade: [],
+    image:undefined,
     dob: "",
     email: "",
     mobile: undefined,

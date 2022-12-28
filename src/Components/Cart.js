@@ -221,7 +221,7 @@ function Cart() {
                               rippleColor="light"
                               className="bg-image rounded hover-zoom hover-overlay"
                             >
-                              <img src={product.image} className="w-100" />
+                              <img src={product.MediaID !== undefined && product.MediaID.length !== 0 ? product.MediaID[0] : require('../default_image.webp')} className="w-100" />
                               <a href="#!">
                                 <div
                                   className="mask"
@@ -241,7 +241,7 @@ function Cart() {
                             <p>Size: M</p>
 
                             <MDBBtn
-                              wrapperClass="me-1 m-3"
+                              className="me-1 my-3"
                               title="Remove item"
                               type="button"
                               onClick={(e) => handleRemove(index)}
@@ -249,8 +249,8 @@ function Cart() {
                               <Icon icon={bin2} />
                             </MDBBtn>
 
-                            <MDBTooltip
-                              wrapperProps={{ color: "danger" }}
+                            <MDBBtn
+                              color="danger"
                               wrapperClass="me-1 m-3"
                               title="Move to the wish list"
                             >
@@ -258,7 +258,7 @@ function Cart() {
                                 icon={heart}
                                 onClick={(e) => handleWishList(index)}
                               />
-                            </MDBTooltip>
+                            </MDBBtn>
                           </MDBCol>
                           <MDBCol lg="4" md="6" className="mb-4 mb-lg-0">
                             <div

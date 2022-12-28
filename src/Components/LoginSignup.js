@@ -24,6 +24,7 @@ export default function LoginSignup() {
     connected:[],
     requestsReceived:[],
     requestsMade:[],
+    image:undefined,
     dob:"",
     email:"",
     mobile:undefined,
