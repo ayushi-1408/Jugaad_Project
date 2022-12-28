@@ -137,9 +137,21 @@ function AddProduct() {
         PID: arrayUnion(ref1.id),
       });
       console.log("updated user");
+      setNewProduct({
+        price: undefined,
+        title: "",
+        dateOfPosting: new Date(),
+        description: "",
+        MediaID: [],
+        CommentID: [],
+        categories: [],
+        BID: [],
+        deliverySpan: 1,
+        keywords: [],
+      });
       setProducts();
       setUser();
-      nav(`/userProfile/${user.uid}/`);
+      
     };
 
     addProduct();
