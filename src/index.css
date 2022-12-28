@@ -11,6 +11,7 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 } */
+
 body {
   font-family: Roboto, Helvetica, Arial, sans-serif;
 }
@@ -24,6 +25,7 @@ body {
   /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
   background: linear-gradient(to right, rgb(84, 131, 112), rgb(168, 238, 131))
   }
+  
   .gradient-custom {
     /* fallback for old browsers */
     background: #6a11cb;
