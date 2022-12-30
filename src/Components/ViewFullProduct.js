@@ -40,11 +40,11 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Spinner from "./Spinner";
 import { Carousel, Form } from "react-bootstrap";
 import Products from "./Products";
+import Rating from "@mui/material/Rating";
 
 function ViewFullProduct(props) {
   const param = useParams();
   const { id } = param;
-  console.log(id);
   const productCollectionRef = doc(db, "Products", id);
   const [product, setProduct] = useState();
 
@@ -54,6 +54,7 @@ function ViewFullProduct(props) {
   const [addToCart, setStateCart] = useState(true);
   const [addToWishList, setStateWishList] = useState(true);
   const [modal, openModal] = useState(false);
+  const [avgRating,setAvgRating] = useState(1);
 
   const nav = useNavigate();
 
@@ -78,6 +79,14 @@ function ViewFullProduct(props) {
       //console.log(user.Cart)
 
       const data = await getDoc(productCollectionRef);
+      if (data.data().Comments !== undefined) {
+        let sum = 0;
+        data.data().Comments.forEach((element) => {
+          sum += element.comment.rating;
+        });
+        console.log(sum / data.data().Comments.length);
+        setAvgRating( sum / data.data().Comments.length);
+      }
       if (user.Cart !== undefined && user.Cart.length > 0)
         user.Cart.forEach((product) =>
           id === product.product ? setStateCart(false) : console.log()
@@ -157,13 +166,13 @@ function ViewFullProduct(props) {
       });
       openModal(false);
       alert("Comment added.");
-      const comm = [...product.Comments, {comment,
-        UId: user.uid,
-        name: user.name,
-        image: user.image,}];
-        comm[comm.length-1].comment.date=Timestamp.fromDate(comment.date)
+      const comm = [
+        ...product.Comments,
+        { comment, UId: user.uid, name: user.name, image: user.image },
+      ];
+      comm[comm.length - 1].comment.date = Timestamp.fromDate(comment.date);
       // console.log(comm[comm.length-1].comment.date)
-      setProduct({...product, Comments:comm})
+      setProduct({ ...product, Comments: comm });
       //console.log(comm)
       setComment({
         rating: 1,
@@ -181,7 +190,20 @@ function ViewFullProduct(props) {
       message: "",
       date: new Date(),
     });
-  }
+  };
+
+  // const avgRating = () => {
+  //   if (product.Comments !== undefined) {
+  //     let sum = 0;
+  //     product.Comments.forEach((element) => {
+  //       sum += element.comment.rating;
+  //     });
+  //     console.log(sum / product.Comments.length);
+  //     return sum / product.Comments.length;
+  //   } else {
+  //     return 2.5;
+  //   }
+  // };
 
   return (
     <>
@@ -202,8 +224,8 @@ function ViewFullProduct(props) {
               onSelect={handleSelect}
             >
               {product.MediaID !== undefined && product.MediaID.length !== 0 ? (
-                product.MediaID.map((element) => (
-                  <Carousel.Item key={element}>
+                product.MediaID.map((element,id) => (
+                  <Carousel.Item key={id}>
                     <img
                       className="d-block w-100"
                       src={element}
@@ -231,7 +253,19 @@ function ViewFullProduct(props) {
               )}
             </Carousel>
           </Card>
-
+          <Card className="mx-3 my-2">
+            <Card.Body>
+              <Card.Title>Customer Rating</Card.Title>
+              <Card.Text>
+                <Rating
+                  name="rating"
+                  value={avgRating}
+                  readOnly
+                  precision={0.5}
+                />
+              </Card.Text>
+            </Card.Body>
+          </Card>
           <Card className="mx-3 my-2">
             <Card.Body>
               <Card.Title>Price</Card.Title>
@@ -353,11 +387,10 @@ function ViewFullProduct(props) {
                             <div className="w-100">
                               <h5>Add a comment</h5>
                               <div style={{ fontSize: "25px" }}>
-                                <StarRatingComponent
+                                <Rating
                                   name="rating"
-                                  starCount={5}
                                   value={comment.rating}
-                                  onStarClick={(val) => {
+                                  onChange={(event,val) => {
                                     setComment({ ...comment, rating: val });
                                   }}
                                 />
@@ -409,62 +442,61 @@ function ViewFullProduct(props) {
                   <h4 className="mt-3">Comments</h4>
                   <p className="fw-light mb-4 pb-2"></p>
 
-                  {
-                    product.Comments !== undefined && product.Comments.length !==0 ? (
-                      product.Comments.map((element) => (
-                        <>
-                          <MDBRow className="card-body p-4">
-                            <MDBCol className="d-flex flex-start col-md-9 ">
-                              <img
-                                className="rounded-circle shadow-1-strong me-3"
-                                src={
-                                  element.image !== "" &&
-                                  element.image !== undefined
-                                    ? element.image
-                                    : require("../default_image.webp")
-                                }
-                                alt="avatar"
-                                width="60"
-                                height="60"
-                              />
-                              <div>
-                                <strong className="fw-bold mb-1 d-flex justify-content-start">
-                                  {element.name}
-                                </strong>
-                                <div class="d-flex align-items-center mb-2" >
-                                  <small class="mb-0">
-                                    {element.comment.date.toDate().toDateString()}
-                                    
-                                  </small>
-                                </div>
-                                
-                                <div
-                                  className="mb-0 "
-                                  style={{ textAlign: "left" }}
-                                >
-                                  {element.comment.message}
-                                </div>
+                  {product.Comments !== undefined &&
+                  product.Comments.length !== 0 ? (
+                    product.Comments.map((element, id) => (
+                      <>
+                        <MDBRow className="card-body p-4" key={id}>
+                          <MDBCol className="d-flex flex-start col-md-9 ">
+                            <img
+                              className="rounded-circle shadow-1-strong me-3"
+                              src={
+                                element.image !== "" &&
+                                element.image !== undefined
+                                  ? element.image
+                                  : require("../default_image.webp")
+                              }
+                              alt="avatar"
+                              width="60"
+                              height="60"
+                            />
+                            <div>
+                              <strong className="fw-bold mb-1 d-flex justify-content-start">
+                                {element.name}
+                              </strong>
+                              <div className="d-flex align-items-center mb-2">
+                                <small className="mb-0">
+                                  {element.comment.date.toDate().toDateString()}
+                                </small>
                               </div>
-                            </MDBCol>
-                            <MDBCol style={{ fontSize: "25px" }} className="d-flex justify-content-end align-self-top">
-                                  <StarRatingComponent
-                                    name="rating"
-                                    starCount={5}
-                                    value={element.comment.rating}
-                                    editing="false"
-                                  />
-                                </MDBCol>
-                          </MDBRow>
-    
-                          <hr className="my-0" />
-                        </>
-                      ))
-                    )
-                     : (
-                      <></>
-                    )
-                  
-                     }
+
+                              <div
+                                className="mb-0 "
+                                style={{ textAlign: "left" }}
+                              >
+                                {element.comment.message}
+                              </div>
+                            </div>
+                          </MDBCol>
+                          <MDBCol
+                            style={{ fontSize: "25px" }}
+                            className="d-flex justify-content-end align-self-top"
+                          >
+                            <Rating
+                              name="rating"
+                              value={element.comment.rating}
+                              readOnly
+                              precision={0.5}
+                            />
+                          </MDBCol>
+                        </MDBRow>
+
+                        <hr className="my-0" />
+                      </>
+                    ))
+                  ) : (
+                    <></>
+                  )}
                 </div>
               </div>
             </div>

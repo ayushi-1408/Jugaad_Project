@@ -109,7 +109,7 @@ export default function Events() {
     <div className="gradient-custom">
      
         <div >
-          <div className="d-flex justify-content-center py-2">
+          <div className="d-flex justify-content-center ">
           <Form.Group
             className="py-3 ps-3 pe-1"
             controlId="city"

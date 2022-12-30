@@ -145,7 +145,7 @@ export default function Products() {
       {/* search bar */}
 
       <div >
-        <div className=" md-5 d-flex justify-content-center py-5 pe-5  ">
+        <div className=" md-5 d-flex justify-content-center py-3 pe-5  ">
           <div className="d-flex align-self-center">
             <div>
               <input
@@ -202,7 +202,7 @@ export default function Products() {
           className=" text-center "
           style={{ alignContent: "center"}}
         >
-          <MDBRow className="d-flex justify-content-center">
+          <MDBRow className="d-flex justify-content-center py-3">
             {filteredProducts.map((product) => (
               <MDBCol
                 className="my-2 mx-1 col-md-4 col-lg-3 col-sm-12 col-xl-3"
