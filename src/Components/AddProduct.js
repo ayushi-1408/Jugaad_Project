@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import '../App.css';
+import "../App.css";
 import { useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
@@ -38,7 +38,8 @@ import {
   list,
 } from "firebase/storage";
 import { TagsInput } from "react-tag-input-component";
-import { WithContext as ReactTags } from 'react-tag-input';
+import { WithContext as ReactTags } from "react-tag-input";
+import Spinner from "./Spinner";
 
 function AddProduct() {
   const [newProduct, setNewProduct] = useState({
@@ -54,22 +55,9 @@ function AddProduct() {
     keywords: [],
   });
   const [media, setMedia] = useState([]);
-  const [tags, setTags] = React.useState([]);
+  const [tags, setTags] = useState([]);
+  const [spinner, setSpinner] = useState(false);
 
-  const suggestions = [
-    { id: 'Vietnam', text: 'Vietnam' },
-    { id: 'Turkey', text: 'Turkey' },
-    { id: 'Thailand', text: 'Thailand' },
-    { id: 'India', text: 'India' },
-    { id: 'Indonesia', text: 'Indonesia' },
-  ]
-  
-  const KeyCodes = {
-    comma: 188,
-    enter: 13,
-  };
-  
-  const delimiters = [KeyCodes.comma, KeyCodes.enter];
   const productCollectionRef = collection(db, "Products");
 
   const { user, setUser } = useContext(UserContext);
@@ -95,8 +83,8 @@ function AddProduct() {
   }
 
   const handleInput = (e) => {
-    console.log(tags);
-    const name = e.target.placeholder;
+    //console.log(tags);
+    const name = e.target.name;
     const value = e.target.value;
     if (name == "price") {
       setNewProduct({ ...newProduct, [name]: parseInt(value) });
@@ -111,14 +99,15 @@ function AddProduct() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(newProduct);
+    setSpinner(true);
+    //console.log(newProduct);
     setNewProduct({ ...newProduct, UID: user.uid });
     const addProduct = async () => {
       const ref1 = await addDoc(productCollectionRef, newProduct);
       // add images to storage
       let temp = [];
       media.forEach(async (element) => {
-        console.log(element);
+        //console.log(element);
         const imageRef = ref(storage, `images/${element.name}`);
         await uploadBytes(imageRef, element).then((snapshot) => {
           getDownloadURL(snapshot.ref).then((url) => {
@@ -131,12 +120,12 @@ function AddProduct() {
       await updateDoc(ref1, {
         keywords: tags,
       });
-      console.log(ref1.id);
+      //console.log(ref1.id);
       const userRef = doc(db, "Users", user.uid);
       await updateDoc(userRef, {
         PID: arrayUnion(ref1.id),
       });
-      console.log("updated user");
+      //console.log("updated user");
       setNewProduct({
         price: undefined,
         title: "",
@@ -151,33 +140,12 @@ function AddProduct() {
       });
       setProducts();
       setUser();
-      
+      setTags([]);
+      setSpinner(false);
+      alert("Product added");
     };
 
     addProduct();
-  };
-
-
-  const handleDelete = (i) => {
-    setTags(tags.filter((tag, index) => index !== i));
-  };
-
-  const handleAddition = (tag) => {
-    setTags([...tags, tag]);
-  };
-
-  const handleDrag = (tag, currPos, newPos) => {
-    const newTags = tags.slice();
-
-    newTags.splice(currPos, 1);
-    newTags.splice(newPos, 0, tag);
-
-    // re-render
-    setTags(newTags);
-  };
-
-  const handleTagClick = (index) => {
-    console.log('The tag at index ' + index + ' was clicked');
   };
 
   return (
@@ -197,9 +165,9 @@ function AddProduct() {
                   <MDBCol md="9" className="pe-5">
                     <MDBInput
                       label="Title"
-                      size="lg"
+                      //size="lg"
                       type="text"
-                      placeholder="title"
+                      name="title"
                       onChange={handleInput}
                       value={newProduct.title}
                     />
@@ -217,7 +185,7 @@ function AddProduct() {
                     <MDBTextArea
                       label="Description"
                       rows={3}
-                      placeholder="description"
+                      name="description"
                       onChange={handleInput}
                       value={newProduct.description}
                     />
@@ -233,9 +201,9 @@ function AddProduct() {
                   <MDBCol md="9" className="pe-5">
                     <MDBInput
                       label="Price"
-                      size="lg"
+                      //size="lg"
                       type="number"
-                      placeholder="price"
+                      name="price"
                       onChange={handleInput}
                       value={newProduct.price}
                     />
@@ -251,8 +219,8 @@ function AddProduct() {
 
                   <MDBCol md="9" className="pe-5">
                     <MDBFile
-                      size="lg"
-                      placeholder="image"
+                      //className="form-control form-control-sm"
+                      name="image"
                       onChange={handleInput}
                       multiple
                       id="customFile"
@@ -290,14 +258,18 @@ function AddProduct() {
                 </MDBRow>
                 <hr className="mx-n3" />
 
-                <MDBBtn
-                  className="my-4"
-                  size="lg"
-                  type="submit"
-                  onClick={handleSubmit}
-                >
-                  SUBMIT
-                </MDBBtn>
+                {spinner ? (
+                  <Spinner />
+                ) : (
+                  <MDBBtn
+                    className="my-4"
+                    size="lg"
+                    type="submit"
+                    onClick={handleSubmit}
+                  >
+                    SUBMIT
+                  </MDBBtn>
+                )}
               </MDBCardBody>
             </MDBCard>
           </MDBCol>

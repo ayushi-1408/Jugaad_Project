@@ -135,7 +135,7 @@ export default function Events() {
           </div>
           </div>
           {filteredEvents !== undefined ? (
-          <MDBRow className=" row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 d-flex justify-content-center g-4 p-3">
+          <MDBRow className=" row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5  d-flex justify-content-center g-4 p-3">
             {
               filteredEvents.length !== 0 ? (
                 filteredEvents.map((product) => (

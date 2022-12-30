@@ -1,120 +1,299 @@
-import React, { useContext, useEffect } from 'react'
-import { useState } from 'react';
-import Form from 'react-bootstrap/Form';
-import {db} from '../firebase-config';
-import {addDoc, arrayUnion, collection , doc, getDoc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
-import UserContext from '../Contexts/UserContext';
-import { Link, redirect, useNavigate } from 'react-router-dom';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import React, { useContext, useEffect } from "react";
+import "../App.css";
+import { useState } from "react";
+import Button from "react-bootstrap/Button";
+import Form from "react-bootstrap/Form";
+import { db, storage } from "../firebase-config";
 import {
-  Button,
-  Card,
-  CardBody,
-  CardText,
-  Col,
-  Container,
-  Input,
-  Row,
-} from "reactstrap";
-import BlogsContext from '../Contexts/BlogsContext';
+  addDoc,
+  arrayUnion,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
+import UserContext from "../Contexts/UserContext";
+import { Link, redirect, useNavigate } from "react-router-dom";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import BlogContext from "../Contexts/BlogsContext";
+import {
+  MDBBtn,
+  MDBContainer,
+  MDBRow,
+  MDBCol,
+  MDBCard,
+  MDBCardBody,
+  MDBInput,
+  MDBTextArea,
+  MDBFile,
+} from "mdb-react-ui-kit";
 
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  listAll,
+  list,
+} from "firebase/storage";
+import { TagsInput } from "react-tag-input-component";
+import { WithContext as ReactTags } from "react-tag-input";
+import Spinner from "./Spinner";
 
 function AddBlog() {
-    const [newBlog,setNewBlog] = useState({
-      title:"",
-      dateOfPosting:new Date(),
-      description:"",
-      MediaID:[],
-      LIkeUID:[],
-      CommentID:[],
-      categories:[],
-      PID:[]
-    })
-    const BlogCollectionRef = collection(db , "Blogs" )
+  const [newBlog, setNewBlog] = useState({
+    title: "",
+    subtitle: "",
+    author: "",
+    dateOfPosting: new Date(),
+    description: "",
+    MediaID: [],
+    LIkeUID: [],
+    Comments: [],
+    categories: [],
+    PID: [],
+  });
+  const [media, setMedia] = useState([]);
+  const [tags, setTags] = React.useState([]);
+  const [spinner, setSpinner] = useState(false);
 
-    const {user,setUser}= useContext(UserContext)
-    const {blogs, setBlogs} = useContext(BlogsContext)
-    const auth=getAuth()
+  const BlogCollectionRef = collection(db, "Blogs");
 
-    const nav=useNavigate()
+  const { user, setUser } = useContext(UserContext);
+  const { Blogs, setBlogs } = useContext(BlogContext);
+  const auth = getAuth();
 
-    if (user==undefined || user.uid == undefined) {
-      onAuthStateChanged(auth, (userr) => {
-        if (userr) {
-         // console.log(userr);
-          const getUser = async () => {
-            const userRef = doc(db, "Users", userr.uid);
-            const data = await getDoc(userRef);
-            setUser({...data.data(),uid:userr.uid})
-          };
-          getUser();
-        } else {
-          nav('/login')
-        }
+  const nav = useNavigate();
+
+  if (user == undefined || user.uid == undefined) {
+    onAuthStateChanged(auth, (userr) => {
+      if (userr) {
+        // console.log(userr);
+        const getUser = async () => {
+          const userRef = doc(db, "Users", userr.uid);
+          const data = await getDoc(userRef);
+          setUser({ ...data.data(), uid: userr.uid });
+        };
+        getUser();
+      } else {
+        nav("/login");
+      }
+    });
+  }
+
+  const handleInput = (e) => {
+   // console.log(tags);
+    const name = e.target.name;
+    const value = e.target.value;
+    if (name === "file") {
+      for (let x = 0; x < e.target.files.length; x++) {
+        setMedia((elements) => [...elements, e.target.files[x]]);
+      }
+    } else {
+      setNewBlog({ ...newBlog, [name]: value });
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setSpinner(true);
+   // console.log(newBlog);
+    setNewBlog({ ...newBlog, UID: user.uid });
+    const addBlog = async () => {
+      const ref1 = await addDoc(BlogCollectionRef, newBlog);
+      // add images to storage
+      media.forEach(async (element) => {
+        //console.log(element);
+        const imageRef = ref(storage, `images/${element.name}`);
+        await uploadBytes(imageRef, element).then((snapshot) => {
+          getDownloadURL(snapshot.ref).then((url) => {
+            updateDoc(ref1, {
+              MediaID: arrayUnion(url),
+            });
+          });
+        });
       });
-    }
+      await updateDoc(ref1, {
+        keywords: tags,
+      });
+      //console.log(ref1.id);
+      const userRef = doc(db, "Users", user.uid);
+      await updateDoc(userRef, {
+        BID: arrayUnion(ref1.id),
+      });
+      //console.log("updated user");
+      setNewBlog({
+        title: "",
+        subtitle: "",
+        author: "",
+        dateOfPosting: new Date(),
+        description: "",
+        MediaID: [],
+        LIkeUID: [],
+        Comments: [],
+        categories: [],
+        PID: [],
+      });
+      setBlogs();
+      setUser();
+      setTags([]);
+      setSpinner(false);
+      alert('Blog added');
+    };
 
-    const handleInput = (e) => {
-        const name=e.target.placeholder;
-        const value=e.target.value;
-          setNewBlog({...newBlog, [name]:value})
-        console.log(name)
-    }
-
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        console.log(newBlog)
-        const addBlog = async () => {
-            setNewBlog({...newBlog, UID:user})
-            const ref1 = await addDoc(BlogCollectionRef,newBlog)
-            console.log(ref1.id)
-            const userRef = doc(db, "Users", user)
-            await updateDoc(userRef,{
-            BID:arrayUnion(ref1.id)
-            })
-            console.log("updated user")
-            setBlogs();
-            setUser();
-            nav('/userProfile');
-         }
-     
-         addBlog();
-
-    }
-
-     
+    addBlog();
+  };
 
   return (
-    <div className="bg-success ">
-    <Container className="mt-4  ">
-      
+    <div>
+      <MDBContainer fluid className="bg-success ">
+        <MDBRow className="d-flex justify-content-center align-items-center ">
+          <MDBCol lg="9" className="mt-4 mb-5">
+            <h1 class="mb-4">Add your Blog</h1>
 
-      <Row className="my-4">
-        <Col
-          md={{
-            size: 9,
-            offset: 1,
-          }}
-        >
-          <h2 className='mt-4'>Write your Jugaad</h2>
+            <MDBCard>
+              <MDBCardBody className="px-4">
+                <MDBRow className="align-items-center pt-4 pb-3">
+                  <MDBCol md="3" className="ps-5">
+                    <h6 className="mb-0">Title</h6>
+                  </MDBCol>
 
-        
+                  <MDBCol md="9" className="pe-5">
+                    <MDBInput
+                      label="Title"
+                      //size="lg"
+                      type="text"
+                      name="title"
+                      onChange={handleInput}
+                      value={newBlog.title}
+                    />
+                  </MDBCol>
+                </MDBRow>
 
-          <Card className="mt-4 border-0  mb-4">
-            <CardBody>
-            <Input type="text" className="mb-3 "placeholder="title" onChange={handleInput} />
-              <Input type="textarea" placeholder="description" onChange={handleInput} />
+                <hr className="mx-n3" />
 
-              <Button onClick={handleSubmit} className="mt-2" color="primary">
-                Create Post
-              </Button>
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+                <MDBRow className="align-items-center pt-4 pb-3">
+                  <MDBCol md="3" className="ps-5">
+                    <h6 className="mb-0">Subtitle</h6>
+                  </MDBCol>
+
+                  <MDBCol md="9" className="pe-5">
+                    <MDBInput
+                      label="Give a Brief Description"
+                      // size="lg"
+                      type="text"
+                      name="subtitle"
+                      onChange={handleInput}
+                      value={newBlog.subtitle}
+                    />
+                  </MDBCol>
+                </MDBRow>
+
+                <hr className="mx-n3" />
+
+                <MDBRow className="align-items-center pt-4 pb-3">
+                  <MDBCol md="3" className="ps-5">
+                    <h6 className="mb-0">Description</h6>
+                  </MDBCol>
+
+                  <MDBCol md="9" className="pe-5">
+                    <MDBTextArea
+                      label="Description"
+                      rows={4}
+                      name="description"
+                      onChange={handleInput}
+                      value={newBlog.description}
+                    />
+                  </MDBCol>
+                </MDBRow>
+
+                <hr className="mx-n3" />
+
+                <MDBRow className="align-items-center pt-4 pb-3">
+                  <MDBCol md="3" className="ps-5">
+                    <h6 className="mb-0">Author</h6>
+                  </MDBCol>
+
+                  <MDBCol md="9" className="pe-5">
+                    <MDBInput
+                      label="Author"
+                      s //ize="lg"
+                      type="text"
+                      name="author"
+                      onChange={handleInput}
+                      value={newBlog.author}
+                    />
+                  </MDBCol>
+                </MDBRow>
+
+                <hr className="mx-n3" />
+
+                <MDBRow className="align-items-center pt-4 pb-3">
+                  <MDBCol md="3" className="ps-5">
+                    <h6 className="mb-0">Upload Media</h6>
+                  </MDBCol>
+
+                  <MDBCol md="9" className="pe-5">
+                    <MDBFile
+                      //size="lg"
+                      name="file"
+                      onChange={handleInput}
+                      multiple
+                      id="customFile"
+                    />
+                    <div className="small text-muted mt-2">
+                      Upload relevant file/Photos. Max file size 50 MB
+                    </div>
+                  </MDBCol>
+                </MDBRow>
+                <hr className="mx-n3" />
+                <MDBRow>
+                  <MDBCol md="3" className="ps-5">
+                    <h6 className="mb-0">Add related keywords</h6>
+                  </MDBCol>
+                  <MDBCol>
+                    <TagsInput
+                      value={tags}
+                      onChange={setTags}
+                      name="Keywords"
+                      placeHolder="Press Enter to add Keywords"
+                    />
+                    {/* <ReactTags
+                      tags={tags}
+                      suggestions={suggestions}
+                      delimiters={delimiters}
+                      handleDelete={handleDelete}
+                      handleAddition={handleAddition}
+                      handleDrag={handleDrag}
+                      handleTagClick={handleTagClick}
+                      inputFieldPosition="bottom"
+                      autocomplete
+                      editable
+                    /> */}
+                  </MDBCol>
+                </MDBRow>
+                <hr className="mx-n3" />
+
+                {spinner ? (
+                  <Spinner />
+                ) : (
+                  <MDBBtn
+                    className="my-4"
+                    size="lg"
+                    type="submit"
+                    onClick={handleSubmit}
+                  >
+                    SUBMIT
+                  </MDBBtn>
+                )}
+              </MDBCardBody>
+            </MDBCard>
+          </MDBCol>
+        </MDBRow>
+      </MDBContainer>
     </div>
-  )
+  );
 }
 
-export default AddBlog
+export default AddBlog;

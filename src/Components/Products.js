@@ -60,11 +60,8 @@ export default function Products() {
 
       getProducts();
       //console.log(products)
-    }
-    else if(filteredProducts === undefined) {
-      setFilteredProducts(
-        products.map((doc) => ({ ...doc }))
-      );
+    } else if (filteredProducts === undefined) {
+      setFilteredProducts(products.map((doc) => ({ ...doc })));
     }
   }, [products]);
 
@@ -138,40 +135,53 @@ export default function Products() {
     console.log(products);
     console.log(filteredProducts);
   };
-  
 
   return (
     <div className="gradient-custom-2">
       {/* search bar */}
 
-      <div >
+      <div>
         <div className=" md-5 d-flex justify-content-center py-3 pe-5  ">
           <div className="d-flex align-self-center">
             <div>
               <input
                 className="form-control  hoverable "
                 placeholder="Search"
-                style={{ width: "300px" , border:"1px solid black"}}
+                style={{ width: "300px" }}
                 type="text"
                 aria-label="Search"
                 value={searchedItem}
                 onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={e => {if(e.key=="Enter") findProducts()}}
+                onKeyDown={(e) => {
+                  if (e.key == "Enter") findProducts();
+                }}
               ></input>
-              <div style={{borderRight: "1px solid darkgray", borderLeft: "1px solid darkgray", background:"white"}}>
+              <div
+                style={{
+                  borderRight: "1px solid darkgray",
+                  borderLeft: "1px solid darkgray",
+                  background: "white",
+                }}
+              >
                 {suggestions !== undefined && suggestions.length !== 0 ? (
                   suggestions.map((element) => {
                     return (
                       <>
                         <div
-                          style={{ borderBottom: "1px solid white"}}
+                          style={{ borderBottom: "1px solid white" }}
                           onClick={(e) => {
                             setSearch(element);
                             findProducts();
                           }}
                         >
-                          <Link style={{textDecoration:"none", fontWeight:"bold", color:"black"}}>
-                          {element}
+                          <Link
+                            style={{
+                              textDecoration: "none",
+                              fontWeight: "bold",
+                              color: "black",
+                            }}
+                          >
+                            {element}
                           </Link>
                         </div>
                       </>
@@ -183,15 +193,22 @@ export default function Products() {
               </div>
             </div>
 
-            {searchedItem !== undefined && searchedItem !== "" ? (
-              <div className="mx-1 d-flex align-self-start align-items-top " >
-                <Button className="btn-light" onClick={clearSearch} size="lg">
-          <Icon icon={x} className="d-flex align-self-center " style={{size:"1.5 rem" }} />
-          </Button>
-              </div>
-            ) : (
-              <></>
-            )}
+           
+              <Button className="pt-2 pb-2 ms-1 btn-light" onClick={findProducts}>
+                <Icon
+                  icon={search}
+                  className="d-flex align-self-center "
+                  size={18}
+                />
+              </Button>
+              <Button className=" ms-1 btn-light" onClick={clearSearch}>
+                <Icon
+                  icon={x}
+                  className="d-flex align-self-center "
+                  size={22}
+                />
+              </Button>
+           
           </div>
         </div>
       </div>
@@ -200,7 +217,7 @@ export default function Products() {
         <MDBContainer
           fluid
           className=" text-center "
-          style={{ alignContent: "center"}}
+          style={{ alignContent: "center" }}
         >
           <MDBRow className="d-flex justify-content-center py-3">
             {filteredProducts.map((product) => (
@@ -212,7 +229,7 @@ export default function Products() {
                   to={`/viewProduct/${product.id}`}
                   style={{ textDecoration: "none", color: "black" }}
                 >
-                  <MDBCard >
+                  <MDBCard>
                     <MDBRipple
                       rippleColor="light"
                       rippleTag="div"
@@ -258,7 +275,7 @@ export default function Products() {
           </MDBRow>
         </MDBContainer>
       ) : filteredProducts !== undefined && filteredProducts.length === 0 ? (
-        <h5 className="mt-5">No products found.</h5>
+        <h5 className="py-5">No products found.</h5>
       ) : (
         <Spinner />
       )}

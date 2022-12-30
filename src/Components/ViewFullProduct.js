@@ -465,7 +465,7 @@ function ViewFullProduct(props) {
                                 {element.name}
                               </strong>
                               <div className="d-flex align-items-center mb-2">
-                                <small className="mb-0">
+                                <small className="mb-0 " style={{fontSize:"12px"}}>
                                   {element.comment.date.toDate().toDateString()}
                                 </small>
                               </div>

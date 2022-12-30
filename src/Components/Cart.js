@@ -207,7 +207,7 @@ function Cart() {
       {cart !== undefined ? (
         <section className="h-100 gradient-custom">
           <MDBContainer className="py-5 h-100">
-            <MDBRow className="justify-content-center my-4">
+            <MDBRow className="justify-content-center ">
               <MDBCol md="8">
                 <MDBCard className="mb-4">
                   <MDBCardHeader className="py-3">
