@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.2.1",
+    "@fortawesome/free-regular-svg-icons": "^6.2.1",
+    "@fortawesome/free-solid-svg-icons": "^6.2.1",
+    "@fortawesome/react-fontawesome": "^0.2.0",
     "@react-icons/all-files": "^4.1.0",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
@@ -12,6 +16,7 @@
     "country-state-city": "^3.1.2",
     "firebase": "^9.13.0",
     "font-awesome": "^4.7.0",
+    "indian-cities-json": "^2.0.0",
     "mdb-react-ui-kit": "^5.0.0",
     "node-sass": "^7.0.3",
     "node-scss": "^7.0.3",

@@ -16,6 +16,7 @@ import {
   getDocs,
   updateDoc,
 } from "firebase/firestore";
+import Rupee from '../indian-rupee-sign-solid.svg';
 import { heart } from "react-icons-kit/icomoon/heart";
 import React, { useEffect } from "react";
 import { useState } from "react";
@@ -25,6 +26,7 @@ import { Link, Navigate, redirect, useNavigate } from "react-router-dom";
 import UserContext from "../Contexts/UserContext";
 import { db } from "../firebase-config";
 import Products from "./Products";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   MDBBtn,
   MDBCard,
@@ -279,7 +281,7 @@ function Cart() {
                             </div>
 
                             <p className="text-start text-md-center">
-                              <strong>${product.price}</strong>
+                              <strong><FontAwesomeIcon icon="fa-solid fa-indian-rupee-sign" />{product.price}</strong>
                             </p>
                           </MDBCol>
                         </MDBRow>
@@ -341,7 +343,7 @@ function Cart() {
                     <MDBListGroup flush>
                       <MDBListGroupItem className="d-flex justify-content-between align-items-center border-0 px-0 pb-0">
                         Products
-                        <span>${sum}</span>
+                        <span><FontAwesomeIcon icon="fa-solid fa-indian-rupee-sign" />{sum}</span>
                       </MDBListGroupItem>
                       <MDBListGroupItem className="d-flex justify-content-between align-items-center px-0">
                         Shipping
@@ -355,7 +357,7 @@ function Cart() {
                           </strong>
                         </div>
                         <span>
-                          <strong>${sum}</strong>
+                          <strong></strong>
                         </span>
                       </MDBListGroupItem>
                     </MDBListGroup>

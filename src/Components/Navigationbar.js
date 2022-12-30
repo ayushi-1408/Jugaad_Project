@@ -99,37 +99,13 @@ function Navigationbar() {
               >
                 Events
               </Link>
-              <Link
-                to="/cart"
-                style={{
-                  textDecoration: "none",
-                  color: "white",
-                  marginRight: "15px",
-                }}
-              >
-                Cart
-              </Link>
             </Nav>
             <Nav className="me-1 d-flex justify-self-end">
               {user !== undefined && user.uid !== undefined ? (
                 <>
-                  {/* <Link
-                    id="userName"
-                   to ={`/userProfile/${user.uid}/`}
-                  // onClick={() => nav(`/userProfile/${user.uid}`)}
-                  // reloadDocument="true"
-                    style={{ textDecoration: "none", color: "white", marginRight:"10px" }}
-                  >
-                    <div class="circle-singleline"><strong>{user.name.charAt(0)}</strong></div> 
-                    
-                  </Link>
-
-                  <Button variant="danger" onClick={handleLogout} >
-                    Logout
-                  </Button> */}
                   <Dropdown>
-                    <Dropdown.Toggle variant="light" id="dropdown-basic" className="circle-singleline" style={{width:"50px"}}>
-                    <Icon icon={ic_person}/>
+                    <Dropdown.Toggle variant="light" id="dropdown-basic" className="circle-singleline" style={{width:"60px"}}>
+                    <Icon icon={ic_person} size="25"/>
                     </Dropdown.Toggle>
 
                     <Dropdown.Menu>

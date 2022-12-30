@@ -47,7 +47,7 @@ function AddProduct() {
     dateOfPosting: new Date(),
     description: "",
     MediaID: [],
-    CommentID: [],
+    Comments: [],
     categories: [],
     BID: [],
     deliverySpan: 1,

@@ -47,7 +47,7 @@ export default function Products() {
   ]);
 
   useEffect(() => {
-    if (products === undefined || filteredProducts === undefined) {
+    if (products === undefined) {
       const getProducts = async () => {
         const data = await getDocs(productCollectionRef);
         //console.log(data)
@@ -60,6 +60,11 @@ export default function Products() {
 
       getProducts();
       //console.log(products)
+    }
+    else if(filteredProducts === undefined) {
+      setFilteredProducts(
+        products.map((doc) => ({ ...doc }))
+      );
     }
   }, [products]);
 
@@ -133,38 +138,41 @@ export default function Products() {
     console.log(products);
     console.log(filteredProducts);
   };
+  
 
   return (
-    <>
+    <div className="gradient-custom-2">
       {/* search bar */}
 
-      <div className="gradient-custom-2" style={{ backgroundColor: "#9de2ff" }}>
-        <div className=" md-5 d-flex justify-content-center mt-3 me-5 mb-2 ">
+      <div >
+        <div className=" md-5 d-flex justify-content-center py-5 pe-5  ">
           <div className="d-flex align-self-center">
             <div>
               <input
                 className="form-control  hoverable "
                 placeholder="Search"
-                style={{ width: "300px" , border:"1px solid darkgray"}}
+                style={{ width: "300px" , border:"1px solid black"}}
                 type="text"
                 aria-label="Search"
                 value={searchedItem}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={e => {if(e.key=="Enter") findProducts()}}
               ></input>
-              <div style={{borderRight: "1px solid darkgray", borderLeft: "1px solid darkgray"}}>
+              <div style={{borderRight: "1px solid darkgray", borderLeft: "1px solid darkgray", background:"white"}}>
                 {suggestions !== undefined && suggestions.length !== 0 ? (
                   suggestions.map((element) => {
                     return (
                       <>
                         <div
-                          style={{ borderBottom: "1px solid darkgray", fontWeight:"bold"}}
+                          style={{ borderBottom: "1px solid white"}}
                           onClick={(e) => {
                             setSearch(element);
                             findProducts();
                           }}
                         >
+                          <Link style={{textDecoration:"none", fontWeight:"bold", color:"black"}}>
                           {element}
+                          </Link>
                         </div>
                       </>
                     );
@@ -176,10 +184,10 @@ export default function Products() {
             </div>
 
             {searchedItem !== undefined && searchedItem !== "" ? (
-              <div className="m-2 d-flex align-self-start align-items-center gradient-custom-2" style={{ backgroundColor: "#9de2ff" }}>
-                <div>
-                  <Icon icon={x} onClick={(e) => clearSearch()} />
-                </div>
+              <div className="mx-1 d-flex align-self-start align-items-top " >
+                <Button className="btn-light" onClick={clearSearch} size="lg">
+          <Icon icon={x} className="d-flex align-self-center " style={{size:"1.5 rem" }} />
+          </Button>
               </div>
             ) : (
               <></>
@@ -191,20 +199,20 @@ export default function Products() {
       {filteredProducts !== undefined && filteredProducts.length !== 0 ? (
         <MDBContainer
           fluid
-          className=" text-center gradient-custom-2"
-          style={{ alignContent: "center", backgroundColor: "#9de2ff" }}
+          className=" text-center "
+          style={{ alignContent: "center"}}
         >
-          <MDBRow style={{ alignSelf: "center" }}>
+          <MDBRow className="d-flex justify-content-center">
             {filteredProducts.map((product) => (
               <MDBCol
-                className="my-2 col-md-4 col-lg-3 col-sm-12"
+                className="my-2 mx-1 col-md-4 col-lg-3 col-sm-12 col-xl-3"
                 key={product.id}
               >
                 <Link
                   to={`/viewProduct/${product.id}`}
                   style={{ textDecoration: "none", color: "black" }}
                 >
-                  <MDBCard style={{ maxWidth: "300px" }}>
+                  <MDBCard >
                     <MDBRipple
                       rippleColor="light"
                       rippleTag="div"
@@ -254,6 +262,6 @@ export default function Products() {
       ) : (
         <Spinner />
       )}
-    </>
+    </div>
   );
 }
