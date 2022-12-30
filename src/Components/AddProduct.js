@@ -152,7 +152,7 @@ function AddProduct() {
     <div>
       <MDBContainer fluid className="bg-success ">
         <MDBRow className="d-flex justify-content-center align-items-center ">
-          <MDBCol lg="9" className="mt-4 mb-5">
+          <MDBCol sm="10" md="8"  xl="6" className="mt-4 mb-5">
             <h1 class="mb-4">Add your Product</h1>
 
             <MDBCard>

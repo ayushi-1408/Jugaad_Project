@@ -40,11 +40,13 @@ import {
 import { TagsInput } from "react-tag-input-component";
 import { WithContext as ReactTags } from "react-tag-input";
 import Spinner from "./Spinner";
+import ReactSelect from "react-select";
 
 function AddBlog() {
   const [newBlog, setNewBlog] = useState({
     title: "",
     subtitle: "",
+    honorifics:"",
     author: "",
     dateOfPosting: new Date(),
     description: "",
@@ -98,7 +100,7 @@ function AddBlog() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setSpinner(true);
-   // console.log(newBlog);
+    console.log(newBlog);
     setNewBlog({ ...newBlog, UID: user.uid });
     const addBlog = async () => {
       const ref1 = await addDoc(BlogCollectionRef, newBlog);
@@ -126,6 +128,7 @@ function AddBlog() {
       setNewBlog({
         title: "",
         subtitle: "",
+        honorifics:"",
         author: "",
         dateOfPosting: new Date(),
         description: "",
@@ -145,11 +148,38 @@ function AddBlog() {
     addBlog();
   };
 
+  const honorifics = [
+    {
+      label:"Mr.",
+      name:"Mr."
+    },
+    {
+      label:"Mrs.",
+      name:"Mrs."
+    },
+    {
+      label:"Ms.",
+      name:"Ms."
+    },
+    {
+      label:"Dr.",
+      name:"Dr."
+    },
+    {
+      label:"Miss",
+      name:"Miss"
+    },
+    {
+      label:"Master",
+      name:"Master"
+    }
+  ]
+
   return (
     <div>
       <MDBContainer fluid className="bg-success ">
         <MDBRow className="d-flex justify-content-center align-items-center ">
-          <MDBCol lg="9" className="mt-4 mb-5">
+          <MDBCol sm="10" md="8"  xl="6" className="mt-4 mb-5">
             <h1 class="mb-4">Add your Blog</h1>
 
             <MDBCard>
@@ -215,10 +245,18 @@ function AddBlog() {
                     <h6 className="mb-0">Author</h6>
                   </MDBCol>
 
-                  <MDBCol md="9" className="pe-5">
+                  <MDBCol md="2" className="pe-1">
+                  <ReactSelect
+                      id="city"
+                      name="honorifics"
+                      options={honorifics}
+                      value={newBlog.honorifics}
+                      onChange={(val) => setNewBlog({...newBlog, honorifics:val})}
+                    />
+                    </MDBCol>
+                    <MDBCol md="7" className="pe-5">
                     <MDBInput
                       label="Author"
-                      s //ize="lg"
                       type="text"
                       name="author"
                       onChange={handleInput}
@@ -259,18 +297,6 @@ function AddBlog() {
                       name="Keywords"
                       placeHolder="Press Enter to add Keywords"
                     />
-                    {/* <ReactTags
-                      tags={tags}
-                      suggestions={suggestions}
-                      delimiters={delimiters}
-                      handleDelete={handleDelete}
-                      handleAddition={handleAddition}
-                      handleDrag={handleDrag}
-                      handleTagClick={handleTagClick}
-                      inputFieldPosition="bottom"
-                      autocomplete
-                      editable
-                    /> */}
                   </MDBCol>
                 </MDBRow>
                 <hr className="mx-n3" />
