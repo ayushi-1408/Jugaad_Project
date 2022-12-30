@@ -106,9 +106,9 @@ export default function Events() {
 
 
   return (
-    <>
-      {filteredEvents !== undefined ? (
-        <div className="gradient-custom">
+    <div className="gradient-custom">
+     
+        <div >
           <div className="d-flex justify-content-center py-2">
           <Form.Group
             className="py-3 ps-3 pe-1"
@@ -133,7 +133,8 @@ export default function Events() {
           <Icon icon={x} className="d-flex align-self-center " style={{size:"1.9rem" }} />
           </Button>
           </div>
-         
+          </div>
+          {filteredEvents !== undefined ? (
           <MDBRow className=" row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 d-flex justify-content-center g-4 p-3">
             {
               filteredEvents.length !== 0 ? (
@@ -165,10 +166,10 @@ export default function Events() {
             }
             
           </MDBRow>
-        </div>
+        
       ) : (
         <Spinner />
       )}
-    </>
+    </div>
   );
 }
