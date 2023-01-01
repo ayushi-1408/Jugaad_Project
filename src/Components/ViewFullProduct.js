@@ -9,8 +9,9 @@ import { ic_add_shopping_cart } from "react-icons-kit/md/ic_add_shopping_cart";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { db } from "../firebase-config";
 import { heart } from "react-icons-kit/fa/heart";
-import {starEmpty} from 'react-icons-kit/icomoon/starEmpty'
-import {starFull} from 'react-icons-kit/icomoon/starFull'
+import { starEmpty } from "react-icons-kit/icomoon/starEmpty";
+import { starFull } from "react-icons-kit/icomoon/starFull";
+import StarRatingComponent from "react-star-rating-component";
 import {
   collection,
   getDoc,
@@ -19,6 +20,7 @@ import {
   arrayUnion,
   arrayRemove,
   addDoc,
+  Timestamp,
 } from "firebase/firestore";
 import {
   MDBBtn,
@@ -37,11 +39,12 @@ import UserContext from "../Contexts/UserContext";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import Spinner from "./Spinner";
 import { Carousel, Form } from "react-bootstrap";
+import Products from "./Products";
+import Rating from "@mui/material/Rating";
 
 function ViewFullProduct(props) {
   const param = useParams();
   const { id } = param;
-  console.log(id);
   const productCollectionRef = doc(db, "Products", id);
   const [product, setProduct] = useState();
 
@@ -51,6 +54,7 @@ function ViewFullProduct(props) {
   const [addToCart, setStateCart] = useState(true);
   const [addToWishList, setStateWishList] = useState(true);
   const [modal, openModal] = useState(false);
+  const [avgRating,setAvgRating] = useState(1);
 
   const nav = useNavigate();
 
@@ -73,8 +77,16 @@ function ViewFullProduct(props) {
   useEffect(() => {
     const getProduct = async () => {
       //console.log(user.Cart)
-     
+
       const data = await getDoc(productCollectionRef);
+      if (data.data().Comments !== undefined) {
+        let sum = 0;
+        data.data().Comments.forEach((element) => {
+          sum += element.comment.rating;
+        });
+        console.log(sum / data.data().Comments.length);
+        setAvgRating( sum / data.data().Comments.length);
+      }
       if (user.Cart !== undefined && user.Cart.length > 0)
         user.Cart.forEach((product) =>
           id === product.product ? setStateCart(false) : console.log()
@@ -129,7 +141,12 @@ function ViewFullProduct(props) {
 
   const [index, setIndex] = useState(0);
 
-  const [comment,setComment] = useState();
+  const [comment, setComment] = useState({
+    rating: 1,
+    message: "",
+    date: new Date(),
+    UID: "",
+  });
 
   const handleSelect = (selectedIndex, e) => {
     setIndex(selectedIndex);
@@ -138,16 +155,55 @@ function ViewFullProduct(props) {
   // comment rating date uid name
   const handleComment = () => {
     const addComment = async () => {
+      console.log(comment);
       await updateDoc(productCollectionRef, {
-        Comments: arrayRemove(comment),
+        Comments: arrayUnion({
+          comment,
+          UId: user.uid,
+          name: user.name,
+          image: user.image,
+        }),
       });
       openModal(false);
-      alert('Comment added.')
-      setComment();
+      alert("Comment added.");
+      const comm = [
+        ...product.Comments,
+        { comment, UId: user.uid, name: user.name, image: user.image },
+      ];
+      comm[comm.length - 1].comment.date = Timestamp.fromDate(comment.date);
+      // console.log(comm[comm.length-1].comment.date)
+      setProduct({ ...product, Comments: comm });
+      //console.log(comm)
+      setComment({
+        rating: 1,
+        message: "",
+        date: new Date(),
+      });
     };
-
     addComment();
   };
+
+  const toggleModal = () => {
+    openModal(!modal);
+    setComment({
+      rating: 1,
+      message: "",
+      date: new Date(),
+    });
+  };
+
+  // const avgRating = () => {
+  //   if (product.Comments !== undefined) {
+  //     let sum = 0;
+  //     product.Comments.forEach((element) => {
+  //       sum += element.comment.rating;
+  //     });
+  //     console.log(sum / product.Comments.length);
+  //     return sum / product.Comments.length;
+  //   } else {
+  //     return 2.5;
+  //   }
+  // };
 
   return (
     <>
@@ -168,8 +224,8 @@ function ViewFullProduct(props) {
               onSelect={handleSelect}
             >
               {product.MediaID !== undefined && product.MediaID.length !== 0 ? (
-                product.MediaID.map((element) => (
-                  <Carousel.Item key={element}>
+                product.MediaID.map((element,id) => (
+                  <Carousel.Item key={id}>
                     <img
                       className="d-block w-100"
                       src={element}
@@ -197,7 +253,25 @@ function ViewFullProduct(props) {
               )}
             </Carousel>
           </Card>
-
+          <Card className="mx-3 my-2">
+            <Card.Body>
+              <Card.Title>Customer Rating</Card.Title>
+              <Card.Text>
+                <Rating
+                  name="rating"
+                  value={avgRating}
+                  readOnly
+                  precision={0.5}
+                />
+              </Card.Text>
+            </Card.Body>
+          </Card>
+          <Card className="mx-3 my-2">
+            <Card.Body>
+              <Card.Title>Price</Card.Title>
+              <Card.Text>{product.price}</Card.Text>
+            </Card.Body>
+          </Card>
           <Card className="mx-3 my-2">
             <Card.Body>
               <Card.Title>Description</Card.Title>
@@ -271,8 +345,13 @@ function ViewFullProduct(props) {
               View this user profile
             </Button>
           </Link>
-
-          <Button variant="primary " type="submit" onClick={e => openModal(true)}>
+          <br />
+          <Button
+            variant="warning "
+            type="submit"
+            onClick={(e) => openModal(true)}
+            className="my-4"
+          >
             Add Comment
           </Button>
 
@@ -284,89 +363,68 @@ function ViewFullProduct(props) {
                   <MDBBtn
                     className="btn-close"
                     color="none"
-                    onClick={e => openModal(!modal)}
+                    onClick={(e) => toggleModal()}
                   ></MDBBtn>
                 </MDBModalHeader>
                 <MDBModalBody>
                   <div className="container text-dark">
                     <div className="row d-flex justify-content-center">
-                      <div className="col-md-10 col-lg-8 col-xl-6">
-                        <div className="card">
-                          <div className="card-body p-4">
-                            <div className="d-flex flex-start w-100">
-                              <img
-                                className="rounded-circle shadow-1-strong me-3"
-                                src={
-                                  product.MediaID !== undefined &&
-                                  product.MediaID.length !== 0
-                                    ? product.MediaID[0]
-                                    : require("../default_image.webp")
-                                }
-                                alt="avatar"
-                                width="65"
-                                height="65"
-                              />
-                              <div className="w-100">
-                                <h5>Add a comment</h5>
-                                <ul
-                                  className="rating mb-3"
-                                  data-mdb-toggle="rating"
-                                >
-                                  <li>
-                                    <i
-                                      className="far fa-star fa-sm text-danger"
-                                      title="Bad"
-                                    ></i>
-                                  </li>
-                                  <li>
-                                    <i
-                                      className="far fa-star fa-sm text-danger"
-                                      title="Poor"
-                                    ></i>
-                                  </li>
-                                  <li>
-                                    <i
-                                      className="far fa-star fa-sm text-danger"
-                                      title="OK"
-                                    ></i>
-                                  </li>
-                                  <li>
-                                    <i
-                                      className="far fa-star fa-sm text-danger"
-                                      title="Good"
-                                    ></i>
-                                  </li>
-                                  <li>
-                                    <i
-                                      className="far fa-star fa-sm text-danger"
-                                      title="Excellent"
-                                    ></i>
-                                  </li>
-                                </ul>
-                                <div className="form-outline">
-                                  <textarea
-                                    className="form-control"
-                                    id="textAreaExample"
-                                    rows="4"
-                                  ></textarea>
-                                  <label
-                                    className="form-label"
-                                    for="textAreaExample"
-                                  >
-                                    What is your view?
-                                  </label>
-                                </div>
+                      {/* <div className="col-md-10 col-lg-8 col-xl-6"> */}
+                      <div className="card">
+                        <div className="card-body p-4">
+                          <div className="d-flex flex-start w-100">
+                            <img
+                              className="rounded-circle shadow-1-strong me-3"
+                              src={
+                                user.image !== undefined && user.image !== ""
+                                  ? user.image
+                                  : require("../default_image.webp")
+                              }
+                              alt="avatar"
+                              width="65"
+                              height="65"
+                            />
+                            <div className="w-100">
+                              <h5>Add a comment</h5>
+                              <div style={{ fontSize: "25px" }}>
+                                <Rating
+                                  name="rating"
+                                  value={comment.rating}
+                                  onChange={(event,val) => {
+                                    setComment({ ...comment, rating: val });
+                                  }}
+                                />
                               </div>
+
+                              <Form.Group
+                                className="mb-3"
+                                controlId="description"
+                              >
+                                <Form.Control
+                                  as="textarea"
+                                  rows={3}
+                                  name="message"
+                                  onChange={(e) => {
+                                    setComment({
+                                      ...comment,
+                                      message: e.target.value,
+                                    });
+                                  }}
+                                  value={comment.message}
+                                  placeholder="What is your view?"
+                                />
+                              </Form.Group>
                             </div>
                           </div>
                         </div>
                       </div>
+                      {/* </div> */}
                     </div>
                   </div>
                 </MDBModalBody>
 
                 <MDBModalFooter>
-                  <MDBBtn color="secondary" onClick={e => openModal(!modal)}>
+                  <MDBBtn color="secondary" onClick={(e) => toggleModal()}>
                     Cancel
                   </MDBBtn>
                   <MDBBtn color="danger" onClick={handleComment}>
@@ -377,72 +435,72 @@ function ViewFullProduct(props) {
             </MDBModalDialog>
           </MDBModal>
 
+          <div className="container mb-2 pb-5">
+            <div className="row d-flex justify-content-center">
+              <div className="col-md-12 col-lg-8 col-xl-6">
+                <div className="card text-dark">
+                  <h4 className="mt-3">Comments</h4>
+                  <p className="fw-light mb-4 pb-2"></p>
 
-        
-  <div className="container my-2 py-5">
-    <div className="row d-flex justify-content-center">
-      <div className="col-md-12 col-lg-10">
-        <div className="card text-dark">
-          <div className="card-body p-4">
-            <h5 className="mb-0">Comments</h5>
-            <p className="fw-light mb-4 pb-2"></p>
+                  {product.Comments !== undefined &&
+                  product.Comments.length !== 0 ? (
+                    product.Comments.map((element, id) => (
+                      <>
+                        <MDBRow className="card-body p-4" key={id}>
+                          <MDBCol className="d-flex flex-start col-md-9 ">
+                            <img
+                              className="rounded-circle shadow-1-strong me-3"
+                              src={
+                                element.image !== "" &&
+                                element.image !== undefined
+                                  ? element.image
+                                  : require("../default_image.webp")
+                              }
+                              alt="avatar"
+                              width="60"
+                              height="60"
+                            />
+                            <div>
+                              <strong className="fw-bold mb-1 d-flex justify-content-start">
+                                {element.name}
+                              </strong>
+                              <div className="d-flex align-items-center mb-2">
+                                <small className="mb-0">
+                                  {element.comment.date.toDate().toDateString()}
+                                </small>
+                              </div>
 
-            <div className="d-flex flex-start ">
-              <img className="rounded-circle shadow-1-strong me-3"
-                src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(23).webp" alt="avatar" width="60"
-                height="60" />
-              <div>
-                <h6 className="fw-bold mb-1  d-flex justify-content-start">Maggie Marsh</h6>
-                <div className="d-flex align-items-center mb-2">
-                  <p className="mb-0">
-                    March 07, 2021
-                    
-                  </p>
-                  <a href="#!" className="link-muted"><i className="fas fa-pencil-alt ms-2"></i></a>
-                  <a href="#!" className="link-muted"><i className="fas fa-redo-alt ms-2"></i></a>
-                  <a href="#!" className="link-muted"><i className="fas fa-heart ms-2"></i></a>
-                </div>
-                <div className="mb-0 " style={{textAlign:"left"}}>
-                  Lorem Ipsum is simply dummy text of the printing and typesetting
-                  industry. Lorem Ipsum has been the industry's standard dummy text ever
-                  since the 1500s, when an unknown printer took a galley of type and
-                  scrambled it.
+                              <div
+                                className="mb-0 "
+                                style={{ textAlign: "left" }}
+                              >
+                                {element.comment.message}
+                              </div>
+                            </div>
+                          </MDBCol>
+                          <MDBCol
+                            style={{ fontSize: "25px" }}
+                            className="d-flex justify-content-end align-self-top"
+                          >
+                            <Rating
+                              name="rating"
+                              value={element.comment.rating}
+                              readOnly
+                              precision={0.5}
+                            />
+                          </MDBCol>
+                        </MDBRow>
+
+                        <hr className="my-0" />
+                      </>
+                    ))
+                  ) : (
+                    <></>
+                  )}
                 </div>
               </div>
             </div>
           </div>
-
-          <hr className="my-0" />
-
-          <div className="card-body p-4">
-            <div className="d-flex flex-start">
-              <img className="rounded-circle shadow-1-strong me-3"
-                src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(24).webp" alt="avatar" width="60"
-                height="60" />
-              <div>
-                <h6 className="fw-bold mb-1">Betty Walker</h6>
-                <div className="d-flex align-items-center mb-3">
-                  <p className="mb-0">
-                    March 30, 2021
-                    <span className="badge bg-primary">Pending</span>
-                  </p>
-                  <a href="#!" className="link-muted"><i className="fas fa-pencil-alt ms-2"></i></a>
-                  <a href="#!" className="link-muted"><i className="fas fa-redo-alt ms-2"></i></a>
-                  <a href="#!" className="link-muted"><i className="fas fa-heart ms-2"></i></a>
-                </div>
-                <p className="mb-0">
-                  It uses a dictionary of over 200 Latin words, combined with a handful of
-                  model sentence structures, to generate Lorem Ipsum which looks
-                  reasonable. The generated Lorem Ipsum is therefore always free from
-                  repetition, injected humour, or non-characteristic words etc.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
         </div>
       ) : (
         <Spinner />
