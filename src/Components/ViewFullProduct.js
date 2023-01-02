@@ -211,7 +211,7 @@ function ViewFullProduct(props) {
         <div>
           <MDBContainer fluid className="bg-success ">
             <MDBRow className="d-flex justify-content-center align-items-center ">
-              <MDBCol lg="9" className="mt-5">
+              <MDBCol lg="8" className="mt-5">
                 <h1 className="mb-4">{product.title}</h1>
               </MDBCol>
             </MDBRow>
@@ -281,7 +281,7 @@ function ViewFullProduct(props) {
 
           {addToCart === true ? (
             <>
-              <div className=" mx-md-n5 mb-3">
+              <div className="  mb-3">
                 <MDBBtn
                   color="primary"
                   size="sm"
@@ -295,7 +295,7 @@ function ViewFullProduct(props) {
             </>
           ) : (
             <>
-              <div className=" mx-md-n5 mb-3">
+              <div className="  mb-3">
                 <MDBBtn
                   outline
                   color="primary"
@@ -313,7 +313,7 @@ function ViewFullProduct(props) {
           )}
           {addToWishList === true ? (
             <>
-              <div className=" mx-md-n5 mb-3">
+              <div className="  mb-3">
                 <MDBBtn
                   color="danger"
                   size="sm"
@@ -326,7 +326,7 @@ function ViewFullProduct(props) {
               </div>
             </>
           ) : (
-            <div className=" mx-md-n5 mb-3">
+            <div className="  mb-3">
               <MDBBtn
                 variant="light"
                 size="sm"
@@ -437,7 +437,7 @@ function ViewFullProduct(props) {
 
           <div className="container mb-2 pb-5">
             <div className="row d-flex justify-content-center">
-              <div className="col-md-12 col-lg-8 col-xl-6">
+              <div className="col-md-10 col-lg-8 col-xl-6">
                 <div className="card text-dark">
                   <h4 className="mt-3">Comments</h4>
                   <p className="fw-light mb-4 pb-2"></p>
@@ -472,7 +472,7 @@ function ViewFullProduct(props) {
 
                               <div
                                 className="mb-0 "
-                                style={{ textAlign: "left" }}
+                                style={{ textAlign: "left" , textAlign:"justify"}}
                               >
                                 {element.comment.message}
                               </div>
