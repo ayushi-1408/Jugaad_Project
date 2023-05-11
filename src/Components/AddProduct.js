@@ -113,6 +113,7 @@ function AddProduct() {
           getDownloadURL(snapshot.ref).then((url) => {
             updateDoc(ref1, {
               MediaID: arrayUnion(url),
+              UID:user.uid
             });
           });
         });
