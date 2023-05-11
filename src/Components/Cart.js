@@ -281,7 +281,7 @@ function Cart() {
                             </div>
 
                             <p className="text-start text-md-center">
-                              <strong><FontAwesomeIcon icon="fa-solid fa-indian-rupee-sign" />{product.price}</strong>
+                              <strong><FontAwesomeIcon icon="fa-solid fa-indian-rupee-sign" /> ₹ {product.price}</strong>
                             </p>
                           </MDBCol>
                         </MDBRow>
@@ -343,7 +343,7 @@ function Cart() {
                     <MDBListGroup flush>
                       <MDBListGroupItem className="d-flex justify-content-between align-items-center border-0 px-0 pb-0">
                         Products
-                        <span><FontAwesomeIcon icon="fa-solid fa-indian-rupee-sign" />{sum}</span>
+                        <span><FontAwesomeIcon icon="fa-solid fa-indian-rupee-sign" /> ₹ {sum}</span>
                       </MDBListGroupItem>
                       <MDBListGroupItem className="d-flex justify-content-between align-items-center px-0">
                         Shipping
